@@ -11,6 +11,7 @@
   ],
   commitMessagePrefix: "deps:",
   minimumReleaseAge: "3 days",
+  schedule: ["before 4am on Monday"],
   ignorePaths: [
     "**/node_modules/**",
     "**/__tests__/**",
