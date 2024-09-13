@@ -9,6 +9,8 @@
     "group:recommended",
     "group:definitelyTyped",
   ],
+  rebaseWhen: "conflicted",
+  updateNotScheduled: false,
   commitMessagePrefix: "deps:",
   minimumReleaseAge: "3 days",
   schedule: ["before 4am on Monday"],
