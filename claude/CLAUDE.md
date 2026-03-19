@@ -57,24 +57,9 @@ yarn e2e                # cypress run --browser chrome (where available)
 
 ## Scripts CLI
 
-The `scripts` command is globally available (linked from `~/Projects/scripts`). Use it for cross-repo operations:
+The `scripts` command is globally available (linked from `~/Projects/scripts`). It provides cross-repo utilities for dependencies, file search, git operations, and GitHub label migration. Most commands accept `--all` to operate on all repos in `~/Projects/`.
 
-```bash
-scripts update-deps              # Update dependencies across projects
-scripts find-packages            # Find all package.json files
-scripts find-files --types .ts   # Find files by type
-scripts find-images              # Find image files
-scripts label-migrate            # Migrate GitHub labels between repos
-scripts git sync                 # Sync git repositories
-scripts git fetch --all          # Fetch all remotes across repos
-scripts git pull --all           # Pull all repos
-scripts git https-to-ssh --all   # Convert HTTPS remotes to SSH
-scripts git fix-head --all       # Fix git HEAD references
-scripts git main-branch          # Get main branch name
-scripts git remote-url           # Get/set remote URL
-```
-
-Most commands accept `--all` to operate on all repos in `~/Projects/`.
+Run `scripts --help` or `scripts <command> --help` for details on available commands and options.
 
 ## Projects Quick Reference
 
