@@ -58,15 +58,13 @@ yarn e2e                # cypress run --browser chrome (where available)
 ## Projects Quick Reference
 
 ### Next.js Web Apps (Yarn)
-- **birchmood** — Static export site with markdown blog
 - **konopskiwebdev** — Full-stack: Drizzle ORM, PostgreSQL, next-auth, Docker Compose
 - **nextjs-lms** — Learning management system
 - **color-scale-generator** — Color tool
 
 ### Other TypeScript (Yarn)
-- **infra-report-action** — GitHub Action, bundles with `@vercel/ncc`
 - **scripts** — CLI utilities (inquirer, yargs, chalk)
-- **configs** — Shared Renovate config
+- **configs** — Shared Renovate config + Claude Code global config
 
 ### VSCode Extensions (npm)
 - **vscode-gcode-extension** — LSP extension for G-code. Has its own AGENTS.md with architecture rules
