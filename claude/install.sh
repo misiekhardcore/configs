@@ -9,7 +9,8 @@ TARGET_DIR="$HOME/.claude"
 
 mkdir -p "$TARGET_DIR"
 
-files=(CLAUDE.md settings.json)
+# Files to symlink directly
+files=(CLAUDE.md settings.json RTK.md)
 
 for file in "${files[@]}"; do
   src="$SCRIPT_DIR/$file"
@@ -23,6 +24,29 @@ for file in "${files[@]}"; do
   if [ -L "$dest" ]; then
     rm "$dest"
   elif [ -f "$dest" ]; then
+    echo "backup: $dest -> $dest.bak"
+    mv "$dest" "$dest.bak"
+  fi
+
+  ln -s "$src" "$dest"
+  echo "linked: $dest -> $src"
+done
+
+# Directories to symlink entirely
+dirs=(hooks skills)
+
+for dir in "${dirs[@]}"; do
+  src="$SCRIPT_DIR/$dir"
+  dest="$TARGET_DIR/$dir"
+
+  if [ ! -d "$src" ]; then
+    echo "skip: $dir/ not found in repo"
+    continue
+  fi
+
+  if [ -L "$dest" ]; then
+    rm "$dest"
+  elif [ -d "$dest" ]; then
     echo "backup: $dest -> $dest.bak"
     mv "$dest" "$dest.bak"
   fi

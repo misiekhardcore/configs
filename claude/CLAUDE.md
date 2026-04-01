@@ -4,24 +4,94 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Feature Workflow
 
-When working on any feature or task, always follow this loop:
+The workflow below describes the **maximum** process. The main conversation decides which phases to engage based on task complexity:
+- **Trivial fix** (obvious problem + solution) → skip to step 5, implement + PR
+- **Medium feature** → steps 1-2, then 5-8
+- **Large feature / epic** → full workflow 1-8
 
-1. **Branch** — Create a feature branch off main (`git checkout -b feat/short-description`)
-2. **Plan** — Thoroughly plan the architecture before writing code. Use plan mode. Read existing code patterns first to stay consistent. Consider whether existing code needs refactoring for a cleaner solution — prefer refactoring over bolting on. Get alignment before proceeding
-3. **Implement** — Write the code. Commit changes incrementally along the way with meaningful messages
-4. **Test** — Run the full verification chain:
-   - Type-check: `tsc --noEmit`
-   - Lint: `yarn lint` / `npm run lint`
-   - Unit tests: `yarn test` / `npm test` — write new tests for new behavior
-   - Build: `yarn build` / `npm run build`
-   - **Next.js projects:** Use Playwright (via MCP) to test changes in the browser — start the dev server, navigate to affected pages, verify the UI works as expected
-   - **VSCode extension projects:** Run `npm run test:e2e` to launch the extension in a debug session and verify behavior end-to-end
-   - **Cypress projects:** Run `yarn e2e` for end-to-end browser tests
-5. **Repeat steps 3-4** until everything passes and the implementation is complete
-6. **Self-review** — Check `git diff main...HEAD` for leftover debug code, forgotten TODOs, or accidental changes
-7. **Draft PR** — Push the branch and open a draft PR (`gh pr create --draft`)
+### 1. Discovery
 
-Do this for every feature, bug fix, or significant change — no exceptions.
+Use grill-me to understand the problem, requirements, edge cases, and constraints. Explore the codebase, ask hard questions, and resolve ambiguity before specifying anything.
+
+### 2. Specification
+
+Create a GitHub issue from the discovery output (`gh issue create`). The issue must have:
+- **Problem statement** — clear description of what and why
+- **Acceptance criteria** — as concrete, testable scenarios (these drive TDD later)
+- **Scope** — well-defined boundaries; one issue = one cohesive unit of work
+- All of the above with the rigor of a senior principal software engineer
+
+The user must approve the issue before proceeding. Do not start coding until sign-off.
+
+**Issue management rules:**
+- Every feature has at least one issue and at least one PR closing it
+- Epics get sub-issues linked with GitHub issue relationships (parent/child)
+- Related issues linked with GitHub relationships
+- Issue bodies kept up to date throughout the lifecycle
+
+### 3. Architecture
+
+Dispatch research agents in parallel to analyze the codebase and relevant domain (e.g., LSP protocol, framework APIs). Synthesize findings into architecture decisions:
+- **Update the issue body** with architecture decisions and approach
+- **Create sub-issues** with GitHub relationships if the work can be decomposed
+- **Add comments** under the issue for secondary decisions and trade-offs that don't belong in the description
+- **Define the dependency graph** between sub-tasks and identify what can be parallelized
+- For complex tasks, have a second agent review/critique the plan before finalizing
+- Optionally create a plan file for tactical execution steps — **must be deleted after implementation is complete**
+
+### 4. Design (optional — visual/UI tasks only)
+
+When the task has visual aspects (webview, frontend pages, components):
+- Design agent proposes **2-3 visual approaches** as code prototypes with screenshots
+- User picks one (or asks for iterations)
+- The chosen design becomes a constraint for implementation
+
+Skip for non-visual work (parsers, services, CLI, etc.).
+
+### 5. Implementation
+
+Create a feature branch off main (`git checkout -b feat/short-description`).
+
+Use **test-driven development (TDD)** for logic-heavy code:
+- **Write a failing test first** — derive test cases from the acceptance criteria on the issue
+- **Implement until the test passes** — minimal code to satisfy the test
+- **Refactor** — clean up while tests stay green
+- **Repeat** for each unit of work
+- Skip TDD for pure boilerplate/wiring (handler registration, thin adapters, factory methods with no logic)
+
+Use parallel worktrees when sub-issues are independent (no shared files). Commit changes incrementally using semantic commit messages (`feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`).
+
+### 6. Verification
+
+QA agent checks **every acceptance criterion** from the issue:
+- Runs the code and verifies the feature works end-to-end
+- Reports pass/fail per criterion with evidence (test output, screenshots)
+- Does **not** fix issues — only reports findings
+
+Loop: engineer fixes findings → QA re-checks → repeat until dev or QA decides the implementation is good enough.
+
+Run the full verification chain:
+- Type-check: `tsc --noEmit`
+- Lint: `yarn lint` / `npm run lint`
+- Unit tests: `yarn test` / `npm test`
+- Build: `yarn build` / `npm run build`
+- **Frontend projects:** Use browser automation (Playwright via MCP, Cypress, etc.) to test UI changes end-to-end
+- **VSCode extension projects:** Run `npm run test:e2e` for Extension Host tests
+- Run any additional e2e or integration test suites defined in the project
+
+### 7. Review
+
+Code-review agent reviews the diff against the spec and coding standards. Check `git diff main...HEAD` for leftover debug code, forgotten TODOs, or accidental changes.
+
+### 8. PR
+
+Push the branch and open a draft PR (`gh pr create --draft`). Link to the issue:
+- `Closes #<issue>` — if this is the only PR or the final PR that completes the issue
+- `Related to #<issue>` — if this is a partial implementation (one of multiple PRs for the issue)
+
+PR description must include a **"Manual testing"** section with concrete steps to verify the change (not a checklist of TODOs, but actual repro steps someone can follow).
+
+Delete the plan file if one was created during architecture.
 
 ## Environment
 
@@ -75,3 +145,5 @@ Run `scripts --help` or `scripts <command> --help` for details on available comm
 ### VSCode Extensions (npm)
 - **vscode-gcode-extension** — LSP extension for G-code. Has its own AGENTS.md with architecture rules
 - **stl-previewer** — STL file previewer
+
+@RTK.md
