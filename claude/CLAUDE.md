@@ -59,7 +59,7 @@ Use **test-driven development (TDD)** for logic-heavy code:
 - **Repeat** for each unit of work
 - Skip TDD for pure boilerplate/wiring (handler registration, thin adapters, factory methods with no logic)
 
-Use **agent teams with parallel worktrees** when sub-issues are independent (no shared files) — each teammate gets its own worktree. Teammates communicate and coordinate with each other, share discoveries, and flag conflicts early. The lead assigns sub-issues and merges results. Commit changes incrementally using semantic commit messages (`feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`).
+Use **agent teams with parallel worktrees** when sub-issues are independent (no shared files) — each team gets its own worktree. Teammates communicate and coordinate with each other, share discoveries, and flag conflicts early. The lead assigns sub-issues and merges results. Commit changes incrementally using semantic commit messages (`feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`).
 
 ### 6. Verification
 
