@@ -31,12 +31,12 @@ The user must approve the issue before proceeding. Do not start coding until sig
 
 ### 3. Architecture
 
-Dispatch research agents in parallel to analyze the codebase and relevant domain (e.g., LSP protocol, framework APIs). Synthesize findings into architecture decisions:
+Dispatch a **team** to research in parallel — each teammate analyzes a different area (codebase structure, external APIs/protocols, prior art) and shares findings via peer-to-peer messages. Synthesize findings into architecture decisions:
 - **Update the issue body** with architecture decisions and approach
 - **Create sub-issues** with GitHub relationships if the work can be decomposed
 - **Add comments** under the issue for secondary decisions and trade-offs that don't belong in the description
 - **Define the dependency graph** between sub-tasks and identify what can be parallelized
-- For complex tasks, have a second agent review/critique the plan before finalizing
+- For complex tasks, dispatch a second team to critique the plan — teammates challenge assumptions and debate trade-offs before finalizing
 - Optionally create a plan file for tactical execution steps — **must be deleted after implementation is complete**
 
 ### 4. Design (optional — visual/UI tasks only)
@@ -59,16 +59,16 @@ Use **test-driven development (TDD)** for logic-heavy code:
 - **Repeat** for each unit of work
 - Skip TDD for pure boilerplate/wiring (handler registration, thin adapters, factory methods with no logic)
 
-Use parallel worktrees when sub-issues are independent (no shared files). Commit changes incrementally using semantic commit messages (`feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`).
+Use **agent teams** when sub-issues are independent — assign each teammate a separate sub-issue on different files to avoid conflicts (teammates don't share file state). Teammates communicate peer-to-peer, share discoveries, and flag potential conflicts. The lead coordinates via the shared task list and merges results. Commit changes incrementally using semantic commit messages (`feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`).
 
 ### 6. Verification
 
-QA agent checks **every acceptance criterion** from the issue:
-- Runs the code and verifies the feature works end-to-end
-- Reports pass/fail per criterion with evidence (test output, screenshots)
-- Does **not** fix issues — only reports findings
+Dispatch a **QA team** to check **every acceptance criterion** from the issue — teammates split criteria across themselves, cross-verify each other's findings via messages, and discuss edge cases:
+- Run the code and verify the feature works end-to-end
+- Report pass/fail per criterion with evidence (test output, screenshots)
+- Do **not** fix issues — only report findings
 
-Loop: engineer fixes findings → QA re-checks → repeat until dev or QA decides the implementation is good enough.
+Loop: engineer fixes findings → QA team re-checks → repeat until the team agrees the implementation is good enough.
 
 Run the full verification chain:
 - Type-check: `tsc --noEmit`
@@ -81,7 +81,7 @@ Run the full verification chain:
 
 ### 7. Review
 
-Code-review agent reviews the diff against the spec and coding standards. Check `git diff main...HEAD` for leftover debug code, forgotten TODOs, or accidental changes.
+Dispatch a **review team** — one teammate focuses on correctness, another on style/standards. Check `git diff main...HEAD` for leftover debug code, forgotten TODOs, or accidental changes. Teammates discuss disagreements via messages and converge on a unified review.
 
 ### 8. PR
 
