@@ -36,7 +36,7 @@ Dispatch a **team** to research in parallel — each teammate analyzes a differe
 - **Create sub-issues** with GitHub relationships if the work can be decomposed
 - **Add comments** under the issue for secondary decisions and trade-offs that don't belong in the description
 - **Define the dependency graph** between sub-tasks and identify what can be parallelized
-- For complex tasks, have a teammate review/critique the plan before finalizing
+- For complex tasks, have a **review team** critique the plan — teammates can challenge assumptions and debate trade-offs before finalizing
 - Optionally create a plan file for tactical execution steps — **must be deleted after implementation is complete**
 
 ### 4. Design (optional — visual/UI tasks only)
@@ -59,16 +59,16 @@ Use **test-driven development (TDD)** for logic-heavy code:
 - **Repeat** for each unit of work
 - Skip TDD for pure boilerplate/wiring (handler registration, thin adapters, factory methods with no logic)
 
-Use **agent teams with parallel worktrees** when sub-issues are independent (no shared files) — each teammate gets its own worktree and works autonomously. The lead coordinates, assigns sub-issues, and merges results. Commit changes incrementally using semantic commit messages (`feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`).
+Use **agent teams with parallel worktrees** when sub-issues are independent (no shared files) — each teammate gets its own worktree. Teammates communicate and coordinate with each other, share discoveries, and flag conflicts early. The lead assigns sub-issues and merges results. Commit changes incrementally using semantic commit messages (`feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`).
 
 ### 6. Verification
 
-Assign a **QA teammate** to check **every acceptance criterion** from the issue:
-- Runs the code and verifies the feature works end-to-end
-- Reports pass/fail per criterion with evidence (test output, screenshots)
-- Does **not** fix issues — only reports findings
+Dispatch a **QA team** to check **every acceptance criterion** from the issue — teammates split criteria, cross-verify each other's findings, and discuss edge cases:
+- Run the code and verify the feature works end-to-end
+- Report pass/fail per criterion with evidence (test output, screenshots)
+- Do **not** fix issues — only report findings
 
-Loop: engineer fixes findings → QA teammate re-checks → repeat until dev or QA decides the implementation is good enough.
+Loop: engineer fixes findings → QA team re-checks → repeat until dev or QA decides the implementation is good enough.
 
 Run the full verification chain:
 - Type-check: `tsc --noEmit`
@@ -81,7 +81,7 @@ Run the full verification chain:
 
 ### 7. Review
 
-Assign a **reviewer teammate** to review the diff against the spec and coding standards. Check `git diff main...HEAD` for leftover debug code, forgotten TODOs, or accidental changes.
+Dispatch a **review team** to review the diff against the spec and coding standards — one teammate focuses on correctness, another on style/standards. Check `git diff main...HEAD` for leftover debug code, forgotten TODOs, or accidental changes. Teammates discuss disagreements and converge on a unified review.
 
 ### 8. PR
 
