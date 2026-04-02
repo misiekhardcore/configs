@@ -1,4 +1,8 @@
 {
+  "statusLine": {
+    "type": "command",
+    "command": "bash /home/michal/.claude/statusline-command.sh"
+  },
   "attribution": {
     "commit": "",
     "pr": ""
@@ -27,6 +31,17 @@
           }
         ]
       }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /home/michal/.claude/hooks/log-session-cost.sh"
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {
@@ -41,6 +56,9 @@
     "vercel@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "effortLevel": "high",
   "voiceEnabled": true
