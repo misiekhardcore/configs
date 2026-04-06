@@ -1,17 +1,67 @@
 {
-  "statusLine": {
-    "type": "command",
-    "command": "bash /home/michal/.claude/statusline-command.sh"
-  },
   "attribution": {
     "commit": "",
     "pr": ""
+  },
+  "effortLevel": "high",
+  "enabledPlugins": {
+    "chrome-devtools-mcp@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "vercel@claude-plugins-official": true,
+    "worktrunk@worktrunk": true
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "extraKnownMarketplaces": {
+    "worktrunk": {
+      "source": {
+        "repo": "max-sixty/worktrunk",
+        "source": "github"
+      }
+    }
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "/home/michal/.claude/hooks/rtk-rewrite.sh",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "command": "bash /home/michal/.claude/hooks/log-session-cost.sh",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ]
   },
   "permissions": {
     "allow": [
       "Agent",
       "Bash",
+      "Grep",
+      "Glob",
       "Read",
+      "Edit",
       "Write",
       "Skill",
       "Update",
@@ -21,46 +71,10 @@
     ],
     "defaultMode": "acceptEdits"
   },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/home/michal/.claude/hooks/rtk-rewrite.sh"
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash /home/michal/.claude/hooks/log-session-cost.sh"
-          }
-        ]
-      }
-    ]
+  "statusLine": {
+    "command": "bash /home/michal/.claude/statusline-command.sh",
+    "type": "command"
   },
-  "enabledPlugins": {
-    "chrome-devtools-mcp@claude-plugins-official": true,
-    "claude-code-setup@claude-plugins-official": true,
-    "code-simplifier@claude-plugins-official": true,
-    "context7@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true,
-    "playwright@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true,
-    "vercel@claude-plugins-official": true,
-    "claude-md-management@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": true
-  },
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  },
-  "effortLevel": "high",
+  "teammateMode": "tmux",
   "voiceEnabled": true
 }
