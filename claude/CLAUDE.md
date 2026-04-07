@@ -5,17 +5,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Feature Workflow
 
 The workflow below describes the **maximum** process. The main conversation decides which phases to engage based on task complexity:
+
 - **Trivial fix** (obvious problem + solution) → skip to step 5, implement + PR
 - **Medium feature** → steps 1-2, then 5-8
 - **Large feature / epic** → full workflow 1-8
 
 ### 1. Discovery
 
-Use grill-me to understand the problem, requirements, edge cases, and constraints. Explore the codebase, ask hard questions, and resolve ambiguity before specifying anything.
+Use /grill-me skill to understand the problem, requirements, edge cases, and constraints. Explore the codebase, ask hard questions, and resolve ambiguity before specifying anything.
 
 ### 2. Specification
 
 Create a GitHub issue from the discovery output (`gh issue create`). The issue must have:
+
 - **Problem statement** — clear description of what and why
 - **Acceptance criteria** — as concrete, testable scenarios (these drive TDD later)
 - **Scope** — well-defined boundaries; one issue = one cohesive unit of work
@@ -24,6 +26,7 @@ Create a GitHub issue from the discovery output (`gh issue create`). The issue m
 The user must approve the issue before proceeding. Do not start coding until sign-off.
 
 **Issue management rules:**
+
 - Every feature has at least one issue and at least one PR closing it
 - Epics get sub-issues linked with GitHub issue relationships (parent/child)
 - Related issues linked with GitHub relationships
@@ -32,6 +35,7 @@ The user must approve the issue before proceeding. Do not start coding until sig
 ### 3. Architecture
 
 Dispatch a **team** to research in parallel — each teammate analyzes a different area (codebase structure, external APIs/protocols, prior art) and shares findings via peer-to-peer messages. Synthesize findings into architecture decisions:
+
 - **Update the issue body** with architecture decisions and approach
 - **Create sub-issues** with GitHub relationships if the work can be decomposed
 - **Add comments** under the issue for secondary decisions and trade-offs that don't belong in the description
@@ -42,9 +46,10 @@ Dispatch a **team** to research in parallel — each teammate analyzes a differe
 ### 4. Design (optional — visual/UI tasks only)
 
 When the task has visual aspects (webview, frontend pages, components):
+
 - Design agent proposes **2-3 visual approaches** as code prototypes with screenshots
 - User picks one (or asks for iterations)
-- The chosen design becomes a constraint for implementation
+- The chosen design becomes a constraint for implementationso
 
 Skip for non-visual work (parsers, services, CLI, etc.).
 
@@ -53,6 +58,7 @@ Skip for non-visual work (parsers, services, CLI, etc.).
 Create a feature branch off main (`git checkout -b feat/short-description`).
 
 Use **test-driven development (TDD)** for logic-heavy code:
+
 - **Write a failing test first** — derive test cases from the acceptance criteria on the issue
 - **Implement until the test passes** — minimal code to satisfy the test
 - **Refactor** — clean up while tests stay green
@@ -64,6 +70,7 @@ Use **agent teams** when sub-issues are independent — assign each teammate a s
 ### 6. Verification
 
 Dispatch a **QA team** to check **every acceptance criterion** from the issue — teammates split criteria across themselves, cross-verify each other's findings via messages, and discuss edge cases:
+
 - Run the code and verify the feature works end-to-end
 - Report pass/fail per criterion with evidence (test output, screenshots)
 - Do **not** fix issues — only report findings
@@ -71,6 +78,7 @@ Dispatch a **QA team** to check **every acceptance criterion** from the issue �
 Loop: engineer fixes findings → QA team re-checks → repeat until the team agrees the implementation is good enough.
 
 Run the full verification chain:
+
 - Type-check: `tsc --noEmit`
 - Lint: `yarn lint` / `npm run lint`
 - Unit tests: `yarn test` / `npm test`
@@ -86,6 +94,7 @@ Dispatch a **review team** — one teammate focuses on correctness, another on s
 ### 8. PR
 
 Push the branch and open a draft PR (`gh pr create --draft`). Link to the issue:
+
 - `Closes #<issue>` — if this is the only PR or the final PR that completes the issue
 - `Related to #<issue>` — if this is a partial implementation (one of multiple PRs for the issue)
 
@@ -93,57 +102,10 @@ PR description must include a **"Manual testing"** section with concrete steps t
 
 Delete the plan file if one was created during architecture.
 
-## Environment
-
-- **User:** Michal Konopski
-- **OS:** Ubuntu Linux
-- **Node:** v25.x (managed via nvm)
-- **Git default branch:** main
-
-## Shared Toolchain
-
-Most projects in `~/Projects/` are TypeScript and share this stack:
-
-| Tool | Version | Notes |
-|------|---------|-------|
-| Package manager | Yarn 4.x (Berry) | `nodeLinker: node-modules` in `.yarnrc.yml`. Exception: VSCode extensions use npm |
-| TypeScript | 5.x | Strict mode |
-| ESLint | 9.x | **Flat config** (`eslint.config.mjs`), not legacy `.eslintrc` |
-| Prettier | 3.x | Integrated via `eslint-plugin-prettier`. `singleQuote: true`, `tabWidth: 2` |
-| Testing | Jest + ts-jest | Next.js projects use `next/jest`. Some projects also have Cypress for e2e |
-| Git hooks | Husky 9.x + lint-staged 16.x | Pre-commit: tsc --noEmit, eslint --fix, prettier --write |
-
-## Common Commands (Yarn-based Projects)
-
-```bash
-yarn dev                # Next.js dev server (Turbopack)
-yarn build              # lint + build
-yarn test               # jest
-yarn test:watch         # jest --watch
-yarn lint               # eslint --cache
-yarn lint-fix           # eslint --fix
-yarn e2e                # cypress run --browser chrome (where available)
-```
-
 ## Scripts CLI
 
 The `scripts` command is globally available (linked from `~/Projects/scripts`). It provides cross-repo utilities for dependencies, file search, git operations, and GitHub label migration. Most commands accept `--all` to operate on all repos in `~/Projects/`.
 
 Run `scripts --help` or `scripts <command> --help` for details on available commands and options.
-
-## Projects Quick Reference
-
-### Next.js Web Apps (Yarn)
-- **konopskiwebdev** — Full-stack: Drizzle ORM, PostgreSQL, next-auth, Docker Compose
-- **nextjs-lms** — Learning management system
-- **color-scale-generator** — Color tool
-
-### Other TypeScript (Yarn)
-- **scripts** — CLI utilities (inquirer, yargs, chalk)
-- **configs** — Shared Renovate config + Claude Code global config
-
-### VSCode Extensions (npm)
-- **vscode-gcode-extension** — LSP extension for G-code. Has its own AGENTS.md with architecture rules
-- **stl-previewer** — STL file previewer
 
 @RTK.md
