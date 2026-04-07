@@ -14,6 +14,8 @@ The workflow below describes the **maximum** process. The main conversation deci
 
 Use /grill-me skill to understand the problem, requirements, edge cases, and constraints. Explore the codebase, ask hard questions, and resolve ambiguity before specifying anything.
 
+When presenting decisions or findings (e.g. in a browser page after grilling), **require explicit full approval before proceeding**. Partial feedback on some decisions is NOT approval of the rest — update the page incorporating the feedback and iterate until the user explicitly signs off on everything. Never infer consent from silence or partial comments.
+
 ### 2. Specification
 
 Create a GitHub issue from the discovery output (`gh issue create`). The issue must have:
@@ -43,19 +45,25 @@ Dispatch a **team** to research in parallel — each teammate analyzes a differe
 - For complex tasks, dispatch a second team to critique the plan — teammates challenge assumptions and debate trade-offs before finalizing
 - Optionally create a plan file for tactical execution steps — **must be deleted after implementation is complete**
 
-### 4. Design (optional — visual/UI tasks only)
+### 4. Design (optional — any task with a visual or conceptual component)
 
-When the task has visual aspects (webview, frontend pages, components):
+When the task has **visual aspects** (webview, frontend pages, components):
 
 - Design agent proposes **2-3 visual approaches** as code prototypes with screenshots
 - User picks one (or asks for iterations)
 - The chosen design becomes a constraint for implementationso
 
-Skip for non-visual work (parsers, services, CLI, etc.).
+When the task benefits from **visual explanation** (architecture, data flow, state machines, complex logic):
+
+- Produce diagrams, flowcharts, tables, or graphs to clarify the approach before implementing
+- Use Mermaid, ASCII diagrams, or HTML prototypes with screenshots — whatever communicates best
+- This applies to any phase (architecture, implementation, review) where a visual would reduce ambiguity
+
+Default to producing visuals when in doubt — a quick diagram is cheap and prevents misunderstanding. Only skip when the change is purely mechanical with no conceptual complexity.
 
 ### 5. Implementation
 
-Create a feature branch off main (`git checkout -b feat/short-description`).
+Create a git worktree for the feature (`git worktree add`). Worktrees keep the main workspace clean and let teammates operate in isolation. Only fall back to a regular branch (`git checkout -b`) for trivial single-file fixes.
 
 Use **test-driven development (TDD)** for logic-heavy code:
 
@@ -65,7 +73,7 @@ Use **test-driven development (TDD)** for logic-heavy code:
 - **Repeat** for each unit of work
 - Skip TDD for pure boilerplate/wiring (handler registration, thin adapters, factory methods with no logic)
 
-Use **agent teams** when sub-issues are independent — assign each teammate a separate sub-issue on different files to avoid conflicts (teammates don't share file state). Teammates communicate peer-to-peer, share discoveries, and flag potential conflicts. The lead coordinates via the shared task list and merges results. Commit changes incrementally using semantic commit messages (`feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`).
+**Default to agent teams** for implementation — assign each teammate a separate sub-issue or file group to avoid conflicts (teammates don't share file state). Teammates communicate peer-to-peer, share discoveries, and flag potential conflicts. The lead coordinates via the shared task list and merges results. Only fall back to inline (single-agent) implementation for trivial fixes or when the change is a single file with no parallelizable work. Do not ask the user whether to use teams — just use them. Commit changes incrementally using semantic commit messages (`feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`).
 
 ### 6. Verification
 
