@@ -38,12 +38,7 @@ A GitHub issue with problem statement and acceptance criteria (from /discovery).
 
 7. Define the dependency graph between sub-tasks — what can be parallelized
 
-8. **Auto-deepen thin sections** — scan the architecture output for weak spots:
-   - Detect vague language: "appropriate", "as needed", "standard approach", "typical", "best practices", "properly configured"
-   - Detect thin sections: fewer than 3 concrete decisions, missing file/component references, or no trade-off analysis
-   - For each thin section found, dispatch a focused **deepening agent** to flesh it out with concrete decisions, specific file/component references, and trade-off analysis
-   - Cap at **2 deepening rounds** to prevent infinite loops
-   - Two modes: **auto** (default) deepens during generation without asking; **interactive** mode asks the user before each deepening round. Use interactive mode when the user explicitly requests it.
+8. **Auto-deepen thin sections** — after step 7, the lead agent scans the architecture output for weak spots. If thin sections are found (vague language like "appropriate"/"as needed"/"standard approach", fewer than 3 concrete decisions, or missing file/component references), it dispatches focused deepening agents via a new TeamCreate call to flesh out those sections with concrete decisions, specific references, and trade-off analysis. Cap at 2 rounds. Ask the user before deepening when invoked by another skill.
 
 ## Output
 

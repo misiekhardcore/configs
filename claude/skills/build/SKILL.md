@@ -32,9 +32,9 @@ A GitHub issue number (with architecture/design decisions from /define) and any 
    3. Can failure leave orphaned state? (partial writes, dangling references, leaked resources)
    4. What other interfaces expose this? (API endpoints, CLI commands, UI components that call this)
    5. Do error handling strategies align across layers?
-   This is not a blocking gate — it is a pause-and-verify prompt. If any answer reveals a gap, address it before moving on.
+   This check is mandatory but does not require user approval to proceed. Always run it; fix any gaps it reveals before committing.
 
-6. **Simplify as you go** — after every 2-3 implementation tasks, do a quick consolidation scan:
+6. **Simplify as you go** — after every 2-3 task completions from the task list, do a quick consolidation scan:
    - Review files you just touched for obvious duplication, dead code, or consolidation opportunities
    - This is NOT a full refactor — just a fast scan for low-hanging improvements
    - If found, create a micro-task to consolidate before proceeding to the next implementation task
