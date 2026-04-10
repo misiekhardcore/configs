@@ -7,6 +7,7 @@
   "enabledPlugins": {
     "chrome-devtools-mcp@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
+    "claude-hud@claude-hud": true,
     "claude-md-management@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
@@ -23,6 +24,12 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "extraKnownMarketplaces": {
+    "claude-hud": {
+      "source": {
+        "repo": "jarrodwatts/claude-hud",
+        "source": "github"
+      }
+    },
     "worktrunk": {
       "source": {
         "repo": "max-sixty/worktrunk",
@@ -75,7 +82,7 @@
     "defaultMode": "acceptEdits"
   },
   "statusLine": {
-    "command": "bash /home/michal/.claude/statusline-command.sh",
+    "command": "bash -c 'plugin_dir=$(ls -d \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}\"/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | awk -F/ '\"'\"'{ print $(NF-1) \"\\t\" $(0) }'\"'\"' | sort -t. -k1,1n -k2,2n -k3,3n -k4,4n | tail -1 | cut -f2-); exec \"/home/michal/.bun/bin/bun\" --env-file /dev/null \"${plugin_dir}src/index.ts\"'",
     "type": "command"
   },
   "teammateMode": "tmux",
