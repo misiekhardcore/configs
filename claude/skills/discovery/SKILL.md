@@ -5,7 +5,26 @@ description: Full discovery phase — explore a problem and produce a GitHub iss
 
 You are leading the discovery phase. Your goal is to take a vague idea and produce a well-specified GitHub issue ready for architecture and implementation.
 
+## Phase 0 — Scope Assessment
+
+Before starting, classify the task scope:
+
+1. **Lightweight** — trivial fix, clear requirements, obvious solution path
+   - Fast-track: single agent runs /describe (Lightweight) then /specify (minimal) sequentially. No team dispatch.
+   - Create the issue directly after user approval.
+2. **Standard** — typical feature with some unknowns
+   - Current behavior: team with /describe and /specify specialists.
+3. **Deep** — complex cross-cutting change, security/auth/payments, architecture change, or multi-team impact
+   - Full team plus additional specialists for flow analysis and adversarial questioning.
+
+Decision tree:
+1. Is the fix already described in a bug report with clear repro steps AND touches one area? → Lightweight
+2. Does it cross module boundaries, touch auth/security/payments, or require architecture decisions? → Deep
+3. Otherwise → Standard
+
 ## Process
+
+### Standard
 
 1. **Spawn a discovery team** using TeamCreate with two specialists:
    - **Describe specialist** — runs /describe to explore the problem space with the user. Produces visualizations, explores user stories, maps boundaries.
@@ -14,6 +33,24 @@ You are leading the discovery phase. Your goal is to take a vague idea and produ
 2. The describe specialist goes first. Once the problem statement is clear and the user has explicitly approved it, hand findings to the specify specialist.
 
 3. The specify specialist drills into requirements. Once acceptance criteria are approved by the user, combine outputs.
+
+### Deep
+
+1. **Spawn an extended discovery team** using TeamCreate with four specialists:
+   - **Describe specialist** — runs /describe (Deep mode) to explore the problem space
+   - **Specify specialist** — runs /specify to produce acceptance criteria
+   - **Flow analyst** — maps the end-to-end flow of the change: what systems are touched, what data moves where, what can break. Produces sequence diagrams and dependency maps.
+   - **Adversarial questioner** — actively challenges assumptions: what if this fails, what's the migration path, what are the security implications, what happens at scale
+
+2. Describe and flow analyst work in parallel. Adversarial questioner reviews their findings and challenges conclusions. Specify specialist works last, incorporating all concerns.
+
+### Lightweight
+
+1. Run /describe in Lightweight mode — quick problem confirmation
+2. Run /specify with minimal ceremony — extract 3-5 core acceptance criteria
+3. Skip to issue creation
+
+### Issue Creation (all modes)
 
 4. **Create a GitHub issue** (`gh issue create`) with:
    - **Title** — concise feature description
