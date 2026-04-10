@@ -1,6 +1,6 @@
 ---
 name: compound
-description: Capture learnings from completed work into durable, searchable solution docs. Invoke when the user says "it's fixed", "that worked", "working now", or explicitly via /compound — also after a non-trivial debugging session or implementation concludes successfully. Turns ephemeral knowledge into reusable artifacts in docs/solutions/.
+description: Capture learnings from completed work into durable, searchable solution docs. Invoke when the user says "it's fixed", "that worked", "working now", or explicitly via /compound — also after a non-trivial debugging session or implementation concludes successfully. Turns ephemeral knowledge into reusable artifacts in .claude/docs/solutions/.
 ---
 
 You are leading the knowledge compounding phase. Your job is to capture what was just learned — the fix, the insight, the pattern — into a durable artifact that future agents and developers can discover and reuse.
@@ -28,23 +28,23 @@ Decision tree:
 
 Single-pass extraction. Work through these steps yourself:
 
-1. Ensure `docs/solutions/` exists — create it if missing
+1. Ensure `.claude/docs/solutions/` exists — create it if missing
 2. Identify the problem and solution from the conversation history
-3. Search `docs/solutions/` for existing docs with overlapping content (same module, component, or symptoms)
+3. Search `.claude/docs/solutions/` for existing docs with overlapping content (same module, component, or symptoms)
    - **High overlap** (same root cause or very similar symptoms) → update the existing doc instead of creating a new one
    - **Partial overlap** (related but distinct) → create new doc, add a "See also" link to the related doc
    - **No overlap** → create new doc
 4. Write the solution doc (see Knowledge Tracks and Output Format below)
-5. Verify discoverability: check if CLAUDE.md or project-level instructions mention `docs/solutions/`. If not, suggest adding a line like: `Check docs/solutions/ for known issues and patterns before debugging.` Do not modify CLAUDE.md automatically — present the suggestion to the user.
+5. Verify discoverability: check if CLAUDE.md or project-level instructions mention `.claude/docs/solutions/`. If not, suggest adding a line like: `Check .claude/docs/solutions/ for known issues and patterns before debugging.` Do not modify CLAUDE.md automatically — present the suggestion to the user.
 
 ### Full
 
-1. Ensure `docs/solutions/` exists — create it if missing
+1. Ensure `.claude/docs/solutions/` exists — create it if missing
 
 2. **Spawn a compounding team** using TeamCreate with three specialists:
    - **Context analyst** — reviews the full conversation history and git diff to extract: what broke, what was tried, what worked, and why
    - **Solution extractor** — distills the fix into a reusable pattern: root cause, solution steps, prevention guidance
-   - **Overlap scanner** — searches `docs/solutions/` and project docs for existing coverage. Reports whether to create new or update existing:
+   - **Overlap scanner** — searches `.claude/docs/solutions/` and project docs for existing coverage. Reports whether to create new or update existing:
      - **High overlap** (same root cause or very similar symptoms) → update the existing doc with new findings
      - **Partial overlap** (related but distinct) → create new doc, add a "See also" link to the related doc
      - **No overlap** → create new doc
@@ -53,7 +53,7 @@ Single-pass extraction. Work through these steps yourself:
 
 4. Synthesize team findings into a solution doc.
 
-5. Verify discoverability: check if CLAUDE.md or project-level instructions mention `docs/solutions/`. If not, suggest adding a line like: `Check docs/solutions/ for known issues and patterns before debugging.` Do not modify CLAUDE.md automatically — present the suggestion to the user.
+5. Verify discoverability: check if CLAUDE.md or project-level instructions mention `.claude/docs/solutions/`. If not, suggest adding a line like: `Check .claude/docs/solutions/ for known issues and patterns before debugging.` Do not modify CLAUDE.md automatically — present the suggestion to the user.
 
 ## Output
 
@@ -106,7 +106,7 @@ Use when the learning is a pattern, technique, or architectural insight.
 
 ### Output Format
 
-Create (or update) a Markdown file in `docs/solutions/` with this structure:
+Create (or update) a Markdown file in `.claude/docs/solutions/` with this structure:
 
 ```markdown
 ---
@@ -129,7 +129,7 @@ date: <YYYY-MM-DD>
 <!-- Knowledge track content here (Bug Track or Knowledge Track) -->
 ```
 
-File naming: `docs/solutions/<module>-<short-description>.md` (kebab-case).
+File naming: `.claude/docs/solutions/<module>-<short-description>.md` (kebab-case).
 
 ## Rules
 
