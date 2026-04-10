@@ -21,7 +21,7 @@ Before starting, classify the task scope:
    - Run the Product Pressure Test.
 
 Decision tree:
-1. Can the user describe the full solution in one sentence AND it touches one file? → Lightweight
+1. Can the user describe the full change in one sentence AND it touches one file? → Lightweight
 2. Does it cross module boundaries, touch auth/security/payments, or require architecture decisions? → Deep
 3. Otherwise → Standard
 
@@ -34,7 +34,7 @@ Decision tree:
    - **Problem analyst** — uses /grill-me to interview the user: who is this for, what problem does it solve, what does success look like, what's out of scope
    - **Domain researcher** — explores the codebase and external context in parallel: existing patterns, related features, prior art, constraints
    - *(Deep only)* **Prior art researcher** — searches for how similar problems have been solved in this codebase, adjacent projects, and industry. Reports patterns, anti-patterns, and failure modes.
-3. Teammates share findings via messages. The researcher surfaces codebase context that informs the analyst's questions.
+3. Teammates share findings via messages. The domain researcher surfaces codebase context that informs the analyst's questions.
 4. **Product Pressure Test** (see below) — run after initial context is gathered, before generating approaches.
 5. For each major concept or decision point, **produce a visual**:
    - User journey → flowchart or sequence diagram (Mermaid)
@@ -51,9 +51,9 @@ Decision tree:
 2. Explore the codebase briefly to validate assumptions
 3. Produce the problem statement directly
 
-## Product Pressure Test
+### Product Pressure Test
 
-Run this between context exploration and approach generation (Standard and Deep only). Work through these three questions with the user, one at a time, grill-me style — present your assessment and recommendation, then ask for the user's take:
+Run this between context exploration and problem statement synthesis (Standard and Deep only). Work through these three questions with the user, one at a time, grill-me style — present your assessment and recommendation, then ask for the user's take:
 
 1. **"Is this the right problem?"** — Validate the problem statement isn't a symptom of something deeper. Look at the codebase and the user's description — is there an underlying cause that, if addressed, would eliminate this problem and others?
 

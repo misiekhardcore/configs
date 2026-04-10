@@ -3,7 +3,7 @@ name: resolve-pr-feedback
 description: Process PR review feedback in bulk — fetch unresolved threads, triage by category, fix in parallel, and reply with verdicts. Use when a PR has review comments to address or when given a specific review thread URL.
 ---
 
-You are a PR feedback resolution agent. Your job is to systematically process review feedback on a pull request — triage it, fix what can be fixed, and reply with clear verdicts.
+You are leading the PR feedback resolution process. Your job is to systematically process review feedback on a pull request — triage it, fix what can be fixed, and reply with clear verdicts.
 
 ## Input
 
@@ -11,21 +11,24 @@ Either:
 - No argument → process all unresolved threads on the current branch's PR
 - A thread URL → process that single thread
 
-## Phase 1 — Fetch
+## Process
+
+### Phase 1 — Fetch
 
 1. Determine the current PR:
    - If a URL was provided, extract owner/repo and PR number from it
    - Otherwise, use `gh pr view --json number,url` to get the current branch's PR
 2. Fetch all review comments: `gh api repos/{owner}/{repo}/pulls/{number}/comments`
 3. Fetch review threads: `gh api repos/{owner}/{repo}/pulls/{number}/reviews`
-4. Filter out noise:
+4. Fetch top-level PR conversation comments: `gh api repos/{owner}/{repo}/issues/{number}/comments`
+5. Filter out noise:
    - Bot-generated comments (dependabot, CI bots, linters)
    - Pure approval comments with no actionable content
    - CI status summaries
-   - Already-resolved threads (if the API provides resolution status)
-5. If a specific thread URL was given, filter to just that thread
+   - **Note:** The REST API does not expose thread resolution status — treat all fetched threads as potentially unresolved.
+6. If a specific thread URL was given, filter to just that thread
 
-## Phase 2 — Triage
+### Phase 2 — Triage
 
 Classify each remaining thread:
 
@@ -47,7 +50,7 @@ Classify each remaining thread:
 
 Group threads by concern category. Present the triage summary to the user before proceeding.
 
-## Phase 3 — Fix
+### Phase 3 — Fix
 
 **Conflict avoidance:** Before dispatching, map each thread to the file(s) it affects. No two agents may work on the same file in parallel. Threads touching the same file are handled sequentially within one agent.
 
@@ -63,7 +66,9 @@ Group threads by concern category. Present the triage summary to the user before
 
 **Bounded retry:** Each thread gets a maximum of 2 fix-verify cycles. If the fix doesn't verify after 2 attempts, escalate as `needs-human`.
 
-## Phase 4 — Reply
+**Cross-thread regression check:** After all fix agents complete, run the project's test suite to catch cross-thread regressions before replying.
+
+### Phase 4 — Reply
 
 Each thread gets a verdict:
 
@@ -75,9 +80,13 @@ Each thread gets a verdict:
 | `not-addressing` | Intentionally not changing — with rationale | "Not addressing: {rationale}" |
 | `needs-human` | Cannot resolve confidently — escalating | "Needs human review: {context}" |
 
-Post replies on the PR using: `gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies -f body="{reply}"`
+Post replies on the PR using safe body passing to avoid shell injection:
+```bash
+jq -n --arg body "{reply}" '{"body": $body}' | \
+  gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies --input -
+```
 
-## needs-human Escalation
+### Needs-Human Escalation
 
 Before escalating, perform a full investigation:
 

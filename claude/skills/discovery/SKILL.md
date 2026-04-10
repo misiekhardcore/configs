@@ -42,23 +42,23 @@ Decision tree:
    - **Flow analyst** — maps the end-to-end flow of the change: what systems are touched, what data moves where, what can break. Produces sequence diagrams and dependency maps.
    - **Adversarial questioner** — actively challenges assumptions: what if this fails, what's the migration path, what are the security implications, what happens at scale
 
-2. Describe and flow analyst work in parallel. Adversarial questioner reviews their findings and challenges conclusions. Specify specialist works last, incorporating all concerns.
+2. Describe and flow analyst work in parallel. Adversarial questioner waits for both describe and flow analyst to complete, then reviews their combined findings and challenges conclusions. Specify specialist works last, incorporating all concerns.
 
 ### Lightweight
 
 1. Run /describe in Lightweight mode — quick problem confirmation
-2. Run /specify with minimal ceremony — extract 3-5 core acceptance criteria
+2. Extract 3-5 core acceptance criteria directly (do not invoke /specify)
 3. Skip to issue creation
 
 ### Issue Creation (all modes)
 
-4. **Create a GitHub issue** (`gh issue create`) with:
+1. **Create a GitHub issue** (`gh issue create`) with:
    - **Title** — concise feature description
    - **Problem statement** — from /describe output
    - **Acceptance criteria** — from /specify output, as a numbered list of testable scenarios
    - **Scope** — explicit in/out boundaries
 
-5. Present the issue to the user for approval. Do not proceed until sign-off.
+2. Present the issue to the user for approval. Do not proceed until sign-off.
 
 ## Rules
 

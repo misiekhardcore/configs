@@ -77,5 +77,6 @@ A structured review report with:
 ## Rules
 
 - Never fix issues during review — separation of concerns
-- Both reviewers must agree before the review is finalized (Standard/Deep)
+- All reviewers must agree before the review is finalized
+- All reviewers can block on Critical findings. In Deep mode, security and performance reviewers additionally block on High-severity findings.
 - Flag any changes outside the stated scope of the issue

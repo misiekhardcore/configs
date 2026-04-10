@@ -1,15 +1,17 @@
 ---
 name: compound
-description: Capture learnings from completed work into durable, searchable solution docs. Invoke after fixing a bug, implementing a feature, or when something "just worked" — turns ephemeral knowledge into reusable artifacts in docs/solutions/.
+description: Capture learnings from completed work into durable, searchable solution docs. Invoke when the user says "it's fixed", "that worked", "working now", or explicitly via /compound — also after a non-trivial debugging session or implementation concludes successfully. Turns ephemeral knowledge into reusable artifacts in docs/solutions/.
 ---
 
-You are a knowledge compounding agent. Your job is to capture what was just learned — the fix, the insight, the pattern — into a durable artifact that future agents and developers can discover and reuse.
+You are leading the knowledge compounding phase. Your job is to capture what was just learned — the fix, the insight, the pattern — into a durable artifact that future agents and developers can discover and reuse.
 
-## Trigger Conditions
+## Input
 
-Invoke this skill when the user says something like "it's fixed", "that worked", "working now", or explicitly via /compound. Also invoke when a non-trivial debugging session or implementation concludes successfully.
+The current conversation context — a completed debugging session, feature implementation, or fix.
 
-## Phase 0 — Mode Selection
+## Process
+
+### Mode Selection
 
 Assess the complexity of what was just learned:
 
@@ -17,39 +19,49 @@ Assess the complexity of what was just learned:
 - **Full** — multi-step debugging, non-obvious root cause, or pattern that applies broadly. Parallel sub-agents for thorough extraction.
 
 Decision tree:
-1. Was the fix a one-liner or config change with obvious cause? → Lightweight
+1. Is this a pattern others will hit? → Full
 2. Did debugging involve multiple hypotheses or files? → Full
-3. Is this a pattern others will hit? → Full
+3. Was the fix a one-liner or config change with obvious cause AND unlikely to recur? → Lightweight
 4. Is the user explicitly asking for a quick capture? → Lightweight
 
-## Lightweight Mode
+### Lightweight
 
 Single-pass extraction. Work through these steps yourself:
 
-1. Identify the problem and solution from the conversation history
-2. Search `docs/solutions/` for existing docs with overlapping content
-3. If high overlap found → update the existing doc instead of creating a new one
-4. Write the solution doc (see Output Format below)
-5. Verify discoverability (see Discoverability Check)
+1. Ensure `docs/solutions/` exists — create it if missing
+2. Identify the problem and solution from the conversation history
+3. Search `docs/solutions/` for existing docs with overlapping content (same module, component, or symptoms)
+   - **High overlap** (same root cause or very similar symptoms) → update the existing doc instead of creating a new one
+   - **Partial overlap** (related but distinct) → create new doc, add a "See also" link to the related doc
+   - **No overlap** → create new doc
+4. Write the solution doc (see Knowledge Tracks and Output Format below)
+5. Verify discoverability: check if CLAUDE.md or project-level instructions mention `docs/solutions/`. If not, suggest adding a line like: `Check docs/solutions/ for known issues and patterns before debugging.` Do not modify CLAUDE.md automatically — present the suggestion to the user.
 
-## Full Mode
+### Full
 
-1. **Spawn a compounding team** using TeamCreate with three specialists:
+1. Ensure `docs/solutions/` exists — create it if missing
+
+2. **Spawn a compounding team** using TeamCreate with three specialists:
    - **Context analyst** — reviews the full conversation history and git diff to extract: what broke, what was tried, what worked, and why
    - **Solution extractor** — distills the fix into a reusable pattern: root cause, solution steps, prevention guidance
-   - **Overlap scanner** — searches `docs/solutions/` and project docs for existing coverage. Reports whether to create new or update existing.
+   - **Overlap scanner** — searches `docs/solutions/` and project docs for existing coverage. Reports whether to create new or update existing:
+     - **High overlap** (same root cause or very similar symptoms) → update the existing doc with new findings
+     - **Partial overlap** (related but distinct) → create new doc, add a "See also" link to the related doc
+     - **No overlap** → create new doc
 
-2. Teammates share findings via messages. The overlap scanner's verdict determines whether we create or update.
+3. Teammates share findings via messages. The overlap scanner's verdict determines whether we create or update.
 
-3. Synthesize team findings into a solution doc.
+4. Synthesize team findings into a solution doc.
 
-4. Run the Discoverability Check.
+5. Verify discoverability: check if CLAUDE.md or project-level instructions mention `docs/solutions/`. If not, suggest adding a line like: `Check docs/solutions/ for known issues and patterns before debugging.` Do not modify CLAUDE.md automatically — present the suggestion to the user.
 
-## Knowledge Tracks
+## Output
+
+### Knowledge Tracks
 
 Choose the track that fits what was learned:
 
-### Bug Track
+#### Bug Track
 Use when the learning came from fixing a bug or unexpected behavior.
 
 ```markdown
@@ -72,7 +84,7 @@ Use when the learning came from fixing a bug or unexpected behavior.
 <!-- How to avoid this in the future — tests, linting rules, patterns -->
 ```
 
-### Knowledge Track
+#### Knowledge Track
 Use when the learning is a pattern, technique, or architectural insight.
 
 ```markdown
@@ -92,7 +104,7 @@ Use when the learning is a pattern, technique, or architectural insight.
 <!-- Concrete code examples or references -->
 ```
 
-## Output Format
+### Output Format
 
 Create (or update) a Markdown file in `docs/solutions/` with this structure:
 
@@ -118,24 +130,6 @@ date: <YYYY-MM-DD>
 ```
 
 File naming: `docs/solutions/<module>-<short-description>.md` (kebab-case).
-
-## Overlap Detection
-
-Before creating a new doc:
-
-1. Search `docs/solutions/` for files matching the same module, component, or symptoms
-2. Read top candidates and assess overlap:
-   - **High overlap** (same root cause or very similar symptoms) → update the existing doc with new findings
-   - **Partial overlap** (related but distinct) → create new doc, add a "See also" link to the related doc
-   - **No overlap** → create new doc
-
-## Discoverability Check
-
-After writing the doc, verify that future agents can find it:
-
-1. Check if CLAUDE.md or project-level instructions mention `docs/solutions/`
-2. If not mentioned, suggest adding a line like: `Check docs/solutions/ for known issues and patterns before debugging.`
-3. Do not modify CLAUDE.md automatically — present the suggestion to the user
 
 ## Rules
 
