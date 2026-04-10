@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Implementation Rules
 
 - **Always use agent teams** for non-trivial implementation. Use `TeamCreate` to spawn teammates — assign each a separate sub-issue or file group to avoid conflicts. Only fall back to single-agent for trivial single-file fixes. When dispatching subagents, explicitly instruct them to use teams.
+- Respond concisely; no filler, no preamble
 
 ## Feature Workflow
 
@@ -14,105 +15,26 @@ The workflow below describes the **maximum** process. The main conversation deci
 - **Medium feature** → steps 1-2, then 5-8
 - **Large feature / epic** → full workflow 1-8
 
-### 1. Discovery
+| Step | Phase             | Key action                                                                    |
+| ---- | ----------------- | ----------------------------------------------------------------------------- |
+| 1    | Discovery         | /grill-me — explore problem, require explicit full approval before proceeding |
+| 2    | Specification     | `gh issue create` with problem statement, acceptance criteria, scope          |
+| 3    | Architecture      | Dispatch research team, update issue with decisions, create sub-issues        |
+| 4    | Design (optional) | 2-3 visual approaches for UI; diagrams for complex logic                      |
+| 5    | Implementation    | Git worktree, TDD for logic, agent teams per sub-issue/file group             |
+| 6    | Verification      | QA team checks every acceptance criterion; full lint/test/build chain         |
+| 7    | Review            | Review team (correctness + style); check diff for debug code/TODOs            |
+| 8    | PR                | `gh pr create --draft`, link issue, include manual testing steps              |
 
-Use /grill-me skill to understand the problem, requirements, edge cases, and constraints. Explore the codebase, ask hard questions, and resolve ambiguity before specifying anything.
-
-When presenting decisions or findings (e.g. in a browser page after grilling), **require explicit full approval before proceeding**. Partial feedback on some decisions is NOT approval of the rest — update the page incorporating the feedback and iterate until the user explicitly signs off on everything. Never infer consent from silence or partial comments.
-
-### 2. Specification
-
-Create a GitHub issue from the discovery output (`gh issue create`). The issue must have:
-
-- **Problem statement** — clear description of what and why
-- **Acceptance criteria** — as concrete, testable scenarios (these drive TDD later)
-- **Scope** — well-defined boundaries; one issue = one cohesive unit of work
-- All of the above with the rigor of a senior principal software engineer
-
-The user must approve the issue before proceeding. Do not start coding until sign-off.
-
-**Issue management rules:**
-
-- Every feature has at least one issue and at least one PR closing it
-- Epics get sub-issues linked with GitHub issue relationships (parent/child)
-- Related issues linked with GitHub relationships
-- Issue bodies kept up to date throughout the lifecycle
-
-### 3. Architecture
-
-Dispatch a **team** to research in parallel — each teammate analyzes a different area (codebase structure, external APIs/protocols, prior art) and shares findings via peer-to-peer messages. Synthesize findings into architecture decisions:
-
-- **Update the issue body** with architecture decisions and approach
-- **Create sub-issues** with GitHub relationships if the work can be decomposed
-- **Add comments** under the issue for secondary decisions and trade-offs that don't belong in the description
-- **Define the dependency graph** between sub-tasks and identify what can be parallelized
-- For complex tasks, dispatch a second team to critique the plan — teammates challenge assumptions and debate trade-offs before finalizing
-- Optionally create a plan file for tactical execution steps — **must be deleted after implementation is complete**
-
-### 4. Design (optional — any task with a visual or conceptual component)
-
-When the task has **visual aspects** (webview, frontend pages, components):
-
-- Design agent proposes **2-3 visual approaches** as code prototypes with screenshots
-- User picks one (or asks for iterations)
-- The chosen design becomes a constraint for implementationso
-
-When the task benefits from **visual explanation** (architecture, data flow, state machines, complex logic):
-
-- Produce diagrams, flowcharts, tables, or graphs to clarify the approach before implementing
-- Use Mermaid, ASCII diagrams, or HTML prototypes with screenshots — whatever communicates best
-- This applies to any phase (architecture, implementation, review) where a visual would reduce ambiguity
-
-Default to producing visuals when in doubt — a quick diagram is cheap and prevents misunderstanding. Only skip when the change is purely mechanical with no conceptual complexity.
-
-### 5. Implementation
-
-Create a git worktree for the feature (`git worktree add`). Worktrees keep the main workspace clean and let teammates operate in isolation. Only fall back to a regular branch (`git checkout -b`) for trivial single-file fixes.
-
-Use **test-driven development (TDD)** for logic-heavy code:
-
-- **Write a failing test first** — derive test cases from the acceptance criteria on the issue
-- **Implement until the test passes** — minimal code to satisfy the test
-- **Refactor** — clean up while tests stay green
-- **Repeat** for each unit of work
-- Skip TDD for pure boilerplate/wiring (handler registration, thin adapters, factory methods with no logic)
-
-**Default to agent teams** for implementation — assign each teammate a separate sub-issue or file group to avoid conflicts (teammates don't share file state). Teammates communicate peer-to-peer, share discoveries, and flag potential conflicts. The lead coordinates via the shared task list and merges results. Only fall back to inline (single-agent) implementation for trivial fixes or when the change is a single file with no parallelizable work. Do not ask the user whether to use teams — just use them. Commit changes incrementally using semantic commit messages (`feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`).
-
-### 6. Verification
-
-Dispatch a **QA team** to check **every acceptance criterion** from the issue — teammates split criteria across themselves, cross-verify each other's findings via messages, and discuss edge cases:
-
-- Run the code and verify the feature works end-to-end
-- Report pass/fail per criterion with evidence (test output, screenshots)
-- Do **not** fix issues — only report findings
-
-Loop: engineer fixes findings → QA team re-checks → repeat until the team agrees the implementation is good enough.
-
-Run the full verification chain:
-
-- Type-check: `tsc --noEmit`
-- Lint: `yarn lint` / `npm run lint`
-- Unit tests: `yarn test` / `npm test`
-- Build: `yarn build` / `npm run build`
-- **Frontend projects:** Use browser automation (Playwright via MCP, Cypress, etc.) to test UI changes end-to-end
-- **VSCode extension projects:** Run `npm run test:e2e` for Extension Host tests
-- Run any additional e2e or integration test suites defined in the project
-
-### 7. Review
-
-Dispatch a **review team** — one teammate focuses on correctness, another on style/standards. Check `git diff main...HEAD` for leftover debug code, forgotten TODOs, or accidental changes. Teammates discuss disagreements via messages and converge on a unified review.
-
-### 8. PR
-
-Push the branch and open a draft PR (`gh pr create --draft`). Link to the issue:
-
-- `Closes #<issue>` — if this is the only PR or the final PR that completes the issue
-- `Related to #<issue>` — if this is a partial implementation (one of multiple PRs for the issue)
-
-PR description must include a **"Manual testing"** section with concrete steps to verify the change (not a checklist of TODOs, but actual repro steps someone can follow).
-
-Delete the plan file if one was created during architecture.
+Detailed instructions per step:
+@docs/workflow-1-discovery.md
+@docs/workflow-2-specification.md
+@docs/workflow-3-architecture.md
+@docs/workflow-4-design.md
+@docs/workflow-5-implementation.md
+@docs/workflow-6-verification.md
+@docs/workflow-7-review.md
+@docs/workflow-8-pr.md
 
 ## Scripts CLI
 
