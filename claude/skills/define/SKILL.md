@@ -13,7 +13,7 @@ A GitHub issue number from /discovery (or provided by the user).
 
 1. Read the issue to understand the problem statement and acceptance criteria.
 
-2. **Dispatch parallel research agents** using TeamCreate before the definition team begins:
+2. **Dispatch a research team** using TeamCreate before the definition team begins:
    - **Codebase research agent** — systematic scan of relevant code: technology stack, module structure, related implementations, naming conventions, existing patterns. Outputs a structured context brief.
    - **Patterns/learnings agent** — searches `.claude/docs/solutions/` (if it exists), project documentation, past decision records, and — when local patterns are thin — external documentation via Context7 or web search for relevant prior art and lessons learned.
 
