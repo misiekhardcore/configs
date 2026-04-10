@@ -9,32 +9,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Feature Workflow
 
-The workflow below describes the **maximum** process. The main conversation decides which phases to engage based on task complexity:
+Choose the right level of process based on task complexity:
 
-- **Trivial fix** (obvious problem + solution) → skip to step 5, implement + PR
-- **Medium feature** → steps 1-2, then 5-8
-- **Large feature / epic** → full workflow 1-8
+- **Trivial fix** (obvious problem + solution) → /build directly
+- **Medium feature** → /discovery then /build
+- **Large feature / epic** → /discovery → /define → /build
 
-| Step | Phase             | Key action                                                                    |
-| ---- | ----------------- | ----------------------------------------------------------------------------- |
-| 1    | Discovery         | /grill-me — explore problem, require explicit full approval before proceeding |
-| 2    | Specification     | `gh issue create` with problem statement, acceptance criteria, scope          |
-| 3    | Architecture      | Dispatch research team, update issue with decisions, create sub-issues        |
-| 4    | Design (optional) | 2-3 visual approaches for UI; diagrams for complex logic                      |
-| 5    | Implementation    | Git worktree, TDD for logic, agent teams per sub-issue/file group             |
-| 6    | Verification      | QA team checks every acceptance criterion; full lint/test/build chain         |
-| 7    | Review            | Review team (correctness + style); check diff for debug code/TODOs            |
-| 8    | PR                | `gh pr create --draft`, link issue, include manual testing steps              |
+| Phase      | Skill      | What it does                                                                |
+| ---------- | ---------- | --------------------------------------------------------------------------- |
+| Discovery  | /discovery | Explore problem (/describe) + define requirements (/specify) → GitHub issue |
+| Definition | /define    | Plan architecture (/architecture) + design (/design) → issue comments       |
+| Build      | /build     | /implement → /review → /verify loop → PR when passing                       |
 
-Detailed instructions per step:
-@docs/workflow-1-discovery.md
-@docs/workflow-2-specification.md
-@docs/workflow-3-architecture.md
-@docs/workflow-4-design.md
-@docs/workflow-5-implementation.md
-@docs/workflow-6-verification.md
-@docs/workflow-7-review.md
-@docs/workflow-8-pr.md
+Each skill spawns specialist teams and uses /grill-me for interactive decision-making with visualizations.
+
+### Building-block skills (usable standalone)
+
+| Skill         | Purpose                                                                    |
+| ------------- | -------------------------------------------------------------------------- |
+| /describe     | Explore problem space — visualizations, user stories, comparisons          |
+| /specify      | Define acceptance criteria — testable GIVEN/WHEN/THEN scenarios            |
+| /architecture | Technical decisions — component diagrams, trade-off tables, code structure |
+| /design       | Visual/UX decisions — mockups, interaction flows, prototypes               |
+| /implement    | Code against issue — worktree, TDD, parallel agent teams                   |
+| /review       | Code review — correctness + standards specialists                          |
+| /verify       | QA verification — per-criterion pass/fail with evidence                    |
+| /grill-me     | Base Q&A engine — relentless interviewing on any topic                     |
 
 ## Scripts CLI
 
