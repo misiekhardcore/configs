@@ -1,0 +1,9 @@
+[submodule "claude"]
+	path = claude
+	url = git@github.com:misiekhardcore/claude-config.git
+[submodule "renovate"]
+	path = renovate
+	url = git@github.com:misiekhardcore/renovate-config.git
+[submodule "tmux"]
+	path = tmux
+	url = git@github.com:misiekhardcore/tmux-config.git
