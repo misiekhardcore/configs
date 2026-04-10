@@ -11,15 +11,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Choose the right level of process based on task complexity:
 
-- **Trivial fix** (obvious problem + solution) → /build directly
-- **Medium feature** → /discovery then /build
-- **Large feature / epic** → /discovery → /define → /build
+- **Trivial fix** (obvious problem + solution) → /implement directly
+- **Medium feature** → /discovery then /implement
+- **Large feature / epic** → /discovery → /define → /implement
 
-| Phase      | Skill      | What it does                                                                |
-| ---------- | ---------- | --------------------------------------------------------------------------- |
-| Discovery  | /discovery | Explore problem (/describe) + define requirements (/specify) → GitHub issue |
-| Definition | /define    | Plan architecture (/architecture) + design (/design) → issue comments       |
-| Build      | /build     | /implement → /review → /verify loop → PR when passing                       |
+| Phase          | Skill      | What it does                                                                |
+| -------------- | ---------- | --------------------------------------------------------------------------- |
+| Discovery      | /discovery | Explore problem (/describe) + define requirements (/specify) → GitHub issue |
+| Definition     | /define    | Plan architecture (/architecture) + design (/design) → issue comments       |
+| Implementation | /implement | /build → /review → /verify loop → PR when passing                           |
 
 Each skill spawns specialist teams and uses /grill-me for interactive decision-making with visualizations.
 
@@ -31,7 +31,7 @@ Each skill spawns specialist teams and uses /grill-me for interactive decision-m
 | /specify      | Define acceptance criteria — testable GIVEN/WHEN/THEN scenarios            |
 | /architecture | Technical decisions — component diagrams, trade-off tables, code structure |
 | /design       | Visual/UX decisions — mockups, interaction flows, prototypes               |
-| /implement    | Code against issue — worktree, TDD, parallel agent teams                   |
+| /build        | Code against issue — worktree, TDD, parallel agent teams                   |
 | /review       | Code review — correctness + standards specialists                          |
 | /verify       | QA verification — per-criterion pass/fail with evidence                    |
 | /grill-me     | Base Q&A engine — relentless interviewing on any topic                     |

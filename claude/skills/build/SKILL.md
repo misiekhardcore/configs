@@ -1,44 +1,41 @@
 ---
 name: build
-description: Full build cycle — implement, review, and verify a feature until ready, then open a PR. Orchestrates /implement → /review → /verify in a loop. Use after /define has produced approved architecture decisions.
+description: Build a feature from a GitHub issue. Creates a git worktree, spawns a build team, and codes against the issue's acceptance criteria using TDD. Use after /define has produced approved architecture decisions.
 ---
 
-You are orchestrating the full build cycle. Your goal is to take a fully defined GitHub issue and produce a ready-to-merge PR.
+You are leading the build phase. Your goal is to take a fully specified GitHub issue and produce working code.
 
 ## Input
 
-A GitHub issue number (with architecture/design decisions from /define) and any additional resources (docs, API specs, etc.).
+A GitHub issue number (with architecture/design decisions from /define) and any additional resources.
 
 ## Process
 
-### Cycle: implement → review → verify
+1. Read the issue, all comments, and linked sub-issues to understand the full scope.
 
-1. **Run /implement** — spawns implementation team, codes against the issue
-2. **Run /review** — spawns review team, checks correctness and standards
-3. **Run /verify** — spawns QA team, verifies every acceptance criterion
+2. **Create a git worktree** for the feature (`git worktree add`). Worktrees keep the main workspace clean and let teammates operate in isolation.
 
-If /review or /verify report issues:
-- Feed findings back to /implement for fixes
-- Re-run /review and /verify on the fixes
-- Repeat until both pass clean
+3. **Spawn an implementation team** using TeamCreate:
+   - Assign each teammate a separate sub-issue or file group to avoid conflicts
+   - Teammates communicate peer-to-peer, share discoveries, and flag potential conflicts
+   - The lead coordinates via the shared task list and merges results
 
-### PR creation (after cycle passes)
+4. Each teammate follows **test-driven development (TDD)** for logic-heavy code:
+   - Write a failing test first — derive test cases from the acceptance criteria
+   - Implement until the test passes — minimal code to satisfy the test
+   - Refactor — clean up while tests stay green
+   - Skip TDD for pure boilerplate/wiring
 
-When /review and /verify both pass with no issues:
+5. Commit changes incrementally using semantic commit messages (`feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`).
 
-1. Push the branch to remote
-2. Open a draft PR (`gh pr create --draft`)
-3. Link to the issue:
-   - `Closes #<issue>` — if this is the only/final PR for the issue
-   - `Related to #<issue>` — if this is a partial implementation
-4. PR description must include:
-   - Summary of changes
-   - **Manual testing** section with concrete repro steps someone can follow
-5. Use superpowers:finishing-a-development-branch for PR finalization
+## Output
+
+A feature branch in a worktree with all acceptance criteria implemented, tests passing, and clean incremental commits. Ready for /review.
 
 ## Rules
 
-- Do not open a PR until both /review and /verify pass clean
-- Maximum 3 implement→review→verify cycles before escalating to the user
-- Each cycle should address all findings from the previous cycle, not just some
-- Keep the user informed of cycle progress (which cycle, what was found, what was fixed)
+- Use superpowers:test-driven-development for the TDD workflow
+- Use superpowers:using-git-worktrees for worktree management
+- Use superpowers:dispatching-parallel-agents for team coordination
+- Do not ask the user whether to use teams — just use them
+- Do not open a PR — that happens after /implement completes the full cycle

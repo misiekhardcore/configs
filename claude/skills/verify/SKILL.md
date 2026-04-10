@@ -41,4 +41,4 @@ A QA report with:
 
 - Never fix issues during verification — separation of concerns
 - Every criterion must have evidence (not just "it works")
-- If any criterion fails, the report goes back to /implement for fixes
+- If any criterion fails, the report goes back to /build for fixes
