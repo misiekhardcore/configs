@@ -12,18 +12,33 @@ A GitHub issue with problem statement and acceptance criteria (from /discovery).
 ## Process
 
 1. Read the issue and understand the requirements
-2. **Spawn an architecture team** using TeamCreate:
-   - **Codebase analyst** — explores existing patterns, conventions, constraints, and related code to establish context
-   - **Solution architect** — uses /grill-me to explore approaches with the user, informed by the analyst's findings
+
+2. **Dispatch parallel research agents** using TeamCreate before the architecture team begins:
+   - **Codebase research agent** — systematic scan of relevant code: technology stack, module structure, related implementations, naming conventions, existing patterns. Outputs a structured context brief.
+   - **Patterns/learnings agent** — searches `.claude/docs/solutions/` (if it exists), project documentation, past decision records, and — when local patterns are thin — external documentation via Context7 or web search for relevant prior art and lessons learned.
+
+   **Gate rule**: skip external/web research when codebase research finds 3+ direct pattern examples. Always run full research for security, payments, privacy topics, or when local patterns are thin (fewer than 3 examples).
+
+   Research results feed into the architecture team's context before they begin proposing approaches.
+
+3. **Spawn an architecture team** using TeamCreate, providing them with the research output:
+   - **Codebase analyst** — reviews the research brief and explores specific architectural constraints: module boundaries, deployment topology, and integration points NOT covered by the research scan
+   - **Solution architect** — uses /grill-me to explore approaches with the user, informed by both research and analyst findings
    - **Devil's advocate** — challenges proposed approaches, identifies risks, edge cases, and scaling concerns
-3. Teammates share findings via messages. The analyst feeds context to the architect; the devil's advocate critiques proposals.
-4. For each major decision, present **2-3 approaches** with:
+
+4. Teammates share findings via messages. The analyst feeds context to the architect; the devil's advocate critiques proposals.
+
+5. For each major decision, present **2-3 approaches** with:
    - Architecture diagram (Mermaid component/sequence diagram)
    - Trade-off table (pros, cons, complexity, risk)
    - Code structure preview (directory layout, key interfaces)
    - Recommended approach with rationale
-5. After each decision is resolved, move to the next
-6. Define the dependency graph between sub-tasks — what can be parallelized
+
+6. After each decision is resolved, move to the next
+
+7. Define the dependency graph between sub-tasks — what can be parallelized
+
+8. **Auto-deepen thin sections** — after step 7, the lead agent scans the architecture output for weak spots. If thin sections are found (vague language like "appropriate"/"as needed"/"standard approach", fewer than 3 concrete decisions, or missing file/component references), it dispatches focused deepening agents via a new TeamCreate call to flesh out those sections with concrete decisions, specific references, and trade-off analysis. Cap at 2 rounds. Ask the user before deepening when invoked by another skill.
 
 ## Output
 
@@ -32,6 +47,7 @@ Architecture decisions formatted as issue comments:
 - Key interfaces and data flow
 - Sub-issues with GitHub relationships if the work decomposes
 - Dependency graph identifying parallelizable work
+- Research summary (what was found, what patterns informed the decisions)
 
 ## Rules
 
@@ -41,3 +57,5 @@ Architecture decisions formatted as issue comments:
 - Never propose architecture without reading the existing code first
 - Default to producing visuals — architecture without diagrams is just hand-waving
 - Respect existing patterns unless there's a strong reason to deviate
+- Never leave vague placeholders — every section must have concrete decisions or be explicitly marked as needing user input
+- Research agents run first; architecture team builds on their findings
