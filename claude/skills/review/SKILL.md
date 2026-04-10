@@ -13,9 +13,9 @@ Before starting, classify the review scope:
    - Single reviewer, quick pass. No team dispatch.
    - Focus on correctness and obvious issues only.
 2. **Standard** — typical feature or multi-file change
-   - Current behavior: 2-reviewer team (correctness + standards).
+   - 2 base reviewers + conditional specialists based on diff analysis.
 3. **Deep** — security-sensitive, performance-critical, cross-cutting, or migration/breaking-change
-   - Full team plus additional specialist reviewers.
+   - All specialist reviewers active. Veto power for security/performance.
 
 Decision tree:
 1. Is the diff under ~50 lines and touches one module? → Lightweight
@@ -35,33 +35,56 @@ Decision tree:
 
 1. Read the GitHub issue and its acceptance criteria.
 
-2. **Spawn a review team** using TeamCreate with two specialists:
-   - **Correctness reviewer** — checks that the implementation satisfies every acceptance criterion, handles edge cases, and has no logical errors.
-   - **Standards reviewer** — checks code style, naming, patterns, test quality, and adherence to project conventions.
+2. **Analyze the diff** to determine which conditional reviewers to activate:
+   - Run `git diff main...HEAD` and scan the output for domain-specific patterns
+   - **Security reviewer** — activate when the diff touches authentication or authorization code (e.g., `auth`, `token`, `session`, `permission`). Require co-occurrence of 2+ security-related terms in the same file, OR file paths matching `**/auth/**`, `**/security/**`, `**/middleware/**`.
+   - **Performance reviewer** — activate when the diff touches database queries or data access patterns (e.g., `query`, `findAll`, `SELECT`, `JOIN`, `index`). Trigger on file paths matching `**/db/**`, `**/queries/**` or database-related content — NOT on generic JS iteration methods like `forEach` or `map`.
+   - **Migration reviewer** — activate when the diff includes schema changes or data migrations. Trigger on file paths matching `**/migrations/**`, `**/db/**` or content matching `CREATE TABLE`, `ALTER TABLE`, `addColumn`, `migration`.
 
-3. Both reviewers work in parallel. Each reviewer:
+3. **Spawn a review team** using TeamCreate with the base reviewers plus any activated conditional reviewers:
+   - **Correctness reviewer** (always-on) — checks that the implementation satisfies every acceptance criterion, handles edge cases, and has no logical errors.
+   - **Standards reviewer** (always-on) — checks code style, naming, patterns, test quality, and adherence to project conventions.
+   - **Security reviewer** (conditional) — checks for authentication/authorization bugs, injection vulnerabilities, secret exposure, and unsafe data handling.
+   - **Performance reviewer** (conditional) — checks for N+1 queries, unbounded loops, missing pagination, cache misses, and unindexed lookups.
+   - **Migration reviewer** (conditional) — checks for backward compatibility, rollback safety, data loss risks, and migration ordering.
+
+4. All reviewers work in parallel. Each reviewer:
    - Runs `git diff main...HEAD` to see all changes
    - Checks for leftover debug code, forgotten TODOs, or accidental changes
    - Uses superpowers:requesting-code-review as their review framework
-   - Reports findings as a structured list (file:line, issue, severity)
+   - Reports findings as a structured list with **confidence scoring**:
+     ```
+     - file:line | issue title | severity (P0-P3) | confidence (0.0-1.0)
+     ```
+   - Confidence calibration:
+     - 0.9+ = would bet on this being a real bug
+     - 0.7–0.9 = likely an issue but needs verification
+     - 0.5–0.7 = suspicious but could be intentional
 
-4. Reviewers discuss disagreements via messages and converge on a unified review.
+5. **Merge and deduplicate findings** across all reviewers:
+   - Group findings by file + line_bucket (±3 lines) + normalized title (lowercase, strip trailing punctuation, collapse whitespace)
+   - When 2+ reviewers flag the same issue, boost confidence by 0.10 (clamp to 1.0)
+   - Suppress findings below the confidence thresholds defined in Rules
+   - Merge duplicates into a single finding, noting which reviewers flagged it
+   - Suppressed findings are listed in a collapsed "Low-confidence observations" section at the end of the report
 
-5. Present findings to the implementation lead. Do **not** fix issues — only report them.
+6. Reviewers discuss disagreements via messages and converge on a unified review.
+
+7. Present findings to the implementation lead. Do **not** fix issues — only report them.
 
 ### Deep
 
 1. Read the GitHub issue and its acceptance criteria.
 
-2. **Spawn an extended review team** using TeamCreate with four specialists:
+2. **Spawn an extended review team** using TeamCreate with all specialists active:
    - **Correctness reviewer** — checks acceptance criteria, edge cases, logical errors
    - **Standards reviewer** — checks code style, naming, patterns, test quality
    - **Security reviewer** — checks for vulnerabilities: injection, auth bypass, data exposure, insecure defaults, OWASP top 10 concerns
    - **Performance/migration reviewer** — checks for N+1 queries, unnecessary allocations, breaking changes, migration safety, backward compatibility
 
-3. All reviewers work in parallel. Each uses `git diff main...HEAD` and reports structured findings.
+3. All reviewers work in parallel. Each uses `git diff main...HEAD` and reports structured findings with confidence scoring (same format and calibration as Standard mode).
 
-4. Security and performance reviewers have veto power — their critical findings block the review.
+4. **Merge and deduplicate** — same process as Standard mode.
 
 5. Team converges on a unified review via messages.
 
@@ -71,7 +94,8 @@ Decision tree:
 
 A structured review report with:
 - Pass/fail per acceptance criterion
-- Issues found (with file:line references and severity)
+- Issues found (with file:line references, severity, and confidence score)
+- Which conditional reviewers were activated and why (Standard) or note that all were active (Deep)
 - Recommendations
 
 ## Rules
@@ -80,3 +104,5 @@ A structured review report with:
 - All reviewers must agree before the review is finalized
 - All reviewers can block on Critical findings. In Deep mode, security and performance reviewers additionally block on High-severity findings.
 - Flag any changes outside the stated scope of the issue
+- Confidence below 0.60 means suppress (0.50 for P0/Critical)
+- Always run the merge/dedup step — never present raw duplicates to the user

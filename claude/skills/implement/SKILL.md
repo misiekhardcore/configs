@@ -36,6 +36,10 @@ When /review and /verify both pass with no issues:
    - **Manual testing** section with concrete repro steps someone can follow
 5. Use superpowers:finishing-a-development-branch for PR finalization
 
+### Compound (after PR is open)
+
+6. **Run /compound** — capture learnings from the implementation cycle. If the build involved non-trivial debugging, unexpected edge cases, or architectural surprises, /compound writes them to `.claude/docs/solutions/` so future `/architecture` research can find them.
+
 ## Rules
 
 - Do not open a PR until both /review and /verify pass clean

@@ -13,19 +13,27 @@ A GitHub issue number from /discovery (or provided by the user).
 
 1. Read the issue to understand the problem statement and acceptance criteria.
 
-2. **Spawn a definition team** using TeamCreate with specialists:
-   - **Architecture specialist** — runs /architecture to explore technical approaches. Produces component diagrams, data flow, API design, dependency graphs.
-   - **Design specialist** (if the feature has visual aspects) — runs /design to explore UI/UX approaches. Produces mockups, interaction flows, component hierarchies.
+2. **Dispatch parallel research agents** using TeamCreate before the definition team begins:
+   - **Codebase research agent** — systematic scan of relevant code: technology stack, module structure, related implementations, naming conventions, existing patterns. Outputs a structured context brief.
+   - **Patterns/learnings agent** — searches `.claude/docs/solutions/` (if it exists), project documentation, past decision records, and — when local patterns are thin — external documentation via Context7 or web search for relevant prior art and lessons learned.
 
-3. The architecture specialist goes first. Once technical decisions are approved by the user, the design specialist (if applicable) works within those constraints.
+   **Gate rule**: skip external/web research when codebase research finds 3+ direct pattern examples. Always run full research for security, payments, privacy topics, or when local patterns are thin (fewer than 3 examples).
 
-4. **Update the GitHub issue** with decisions:
+   Research results are passed to both the architecture and design specialists as initial context.
+
+3. **Spawn a definition team** using TeamCreate with specialists:
+   - **Architecture specialist** — runs /architecture to explore technical approaches, seeded with research output. Pass the research brief as input — the Architecture specialist skips its own research phase when a research brief is provided. Produces component diagrams, data flow, API design, dependency graphs.
+   - **Design specialist** (if the feature has visual aspects) — runs /design to explore UI/UX approaches, seeded with research output. Produces mockups, interaction flows, component hierarchies.
+
+4. The architecture specialist goes first. Once technical decisions are approved by the user, the design specialist (if applicable) works within those constraints.
+
+5. **Update the GitHub issue** with decisions:
    - Add architecture decisions as issue comments
    - Add design decisions as issue comments (with visuals)
    - Create sub-issues with GitHub relationships if the work decomposes
    - Define the dependency graph — identify what can be parallelized
 
-5. Present all decisions to the user for approval. Do not proceed until sign-off.
+6. Present all decisions to the user for approval. Do not proceed until sign-off.
 
 ## Rules
 
