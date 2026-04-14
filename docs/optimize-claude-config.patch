@@ -1,7 +1,7 @@
 From 219986ef1971362752a3f2f847f06c165c5d488d Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Tue, 14 Apr 2026 06:48:24 +0000
-Subject: [PATCH] chore: optimize Claude Code config for tokens, context &
+Subject: [PATCH 1/2] chore: optimize Claude Code config for tokens, context &
  model routing
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -193,6 +193,270 @@ index 97f035f..54fc355 100644
  ---
  
  You are leading the review phase. Your goal is to thoroughly review the implementation and produce actionable findings.
+-- 
+2.43.0
+
+
+From bc3b86efd37a2945ab527c65a59cf5b9ef58fb08 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 14 Apr 2026 07:05:05 +0000
+Subject: [PATCH 2/2] =?UTF-8?q?chore:=20context-engineering=20pass=20?=
+ =?UTF-8?q?=E2=80=94=20trim=20CLAUDE.md,=20externalize=20reference,=20tigh?=
+ =?UTF-8?q?ten=20skills?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Second iteration informed by Anthropic's "Effective context engineering for
+AI agents" (smallest set of high-signal tokens, just-in-time over preloading,
+canonical examples over exhaustive rules).
+
+CLAUDE.md (55 -> 29 lines):
+- drop the "building-block skills" table (each skill already carries its own
+  description in the system prompt — the table was duplicate metadata)
+- drop the workflow tables; replace with a single canonical worked example
+- move Maintenance + Scripts CLI sections to REFERENCE.md (on-demand, not
+  auto-loaded)
+- add an explicit "externalize state on long sessions" rule pointing at
+  .claude/notes/<feature>.md
+- add a "just-in-time over preloading" rule
+
+REFERENCE.md: new file, on-demand only. Holds Maintenance, Scripts CLI, RTK
+meta commands, and the notes convention. CLAUDE.md does NOT auto-import it.
+
+settings.json:
+- disable claude-md-management plugin (overlaps the built-in update-config
+  skill that's already loaded by the harness)
+
+Skill body trims (no behavior change, denser prose):
+- discovery: collapse the redundant Decision Tree (the bullets above already
+  describe the same triage)
+- architecture: tighten the Auto-deepen paragraph
+- define: tighten the research-team / gate-rule paragraph
+- build: replace the inline 5-question verification check with a pointer to
+  superpowers:verification-before-completion (the canonical version)
+---
+ CLAUDE.md                    | 54 ++++++++++--------------------------
+ REFERENCE.md                 | 34 +++++++++++++++++++++++
+ settings.json                |  2 +-
+ skills/architecture/SKILL.md |  2 +-
+ skills/build/SKILL.md        |  8 +-----
+ skills/define/SKILL.md       | 10 +++----
+ skills/discovery/SKILL.md    | 19 ++++---------
+ 7 files changed, 60 insertions(+), 69 deletions(-)
+ create mode 100644 REFERENCE.md
+
+diff --git a/CLAUDE.md b/CLAUDE.md
+index b1166bd..d2b1b97 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -1,55 +1,29 @@
+ # CLAUDE.md
+ 
+-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
++Guidance for Claude Code in this repository.
+ 
+ ## Implementation Rules
+ 
+-- **Default to single-agent.** Use `TeamCreate` only for parallelizable work across 3+ independent files or sub-issues. Team overhead (per-agent system prompt, message passing, coordination) costs more than it saves on smaller tasks.
++- **Default to single-agent.** Use `TeamCreate` only for parallelizable work across 3+ independent files or sub-issues.
++- **Use the cheapest viable model.** Skills set their own `model:` and `effortLevel:` — trust them.
++- **Just-in-time over preloading.** Read reference docs (`~/.claude/REFERENCE.md`, `~/.claude/RTK.md`, `~/.claude/plugins-reference.md`) only when the task needs them.
++- **Externalize state on long sessions.** For multi-cycle implementations, write progress notes to `.claude/notes/<feature>.md` instead of carrying them in conversation; re-read on resumption.
+ - Respond concisely; no filler, no preamble.
+-- Use the cheapest viable model. Skills set their own `model:` and `effortLevel:` — trust them.
+ 
+ ## Feature Workflow
+ 
+-Choose the right level of process based on task complexity:
++Pick the lightest path that fits the task:
+ 
+-- **Trivial fix** (obvious problem + solution) → /implement directly
+-- **Medium feature** → /discovery then /implement
+-- **Large feature / epic** → /discovery → /define → /implement
++- Trivial fix → `/implement` directly.
++- Medium feature → `/discovery` → `/implement`.
++- Large feature / epic → `/discovery` → `/define` → `/implement`.
+ 
+-| Phase          | Skill      | What it does                                                                |
+-| -------------- | ---------- | --------------------------------------------------------------------------- |
+-| Discovery      | /discovery | Explore problem (/describe) + define requirements (/specify) → GitHub issue |
+-| Definition     | /define    | Plan architecture (/architecture) + design (/design) → issue comments       |
+-| Implementation | /implement | /build → /review → /verify loop → PR when passing                           |
++### Canonical example — medium feature
+ 
+-Each skill spawns specialist teams and uses /grill-me for interactive decision-making with visualizations.
++> User: "Add a CSV export button to the reports page."
++> 1. `/discovery` — interview the user, write the issue with acceptance criteria, get explicit approval.
++> 2. `/implement` — `/build` codes against the issue with TDD, `/review` runs specialist reviewers, `/verify` checks each criterion, then PR.
+ 
+-### Building-block skills (usable standalone)
+-
+-| Skill         | Purpose                                                                    |
+-| ------------- | -------------------------------------------------------------------------- |
+-| /describe     | Explore problem space — visualizations, user stories, comparisons          |
+-| /specify      | Define acceptance criteria — testable GIVEN/WHEN/THEN scenarios            |
+-| /architecture | Technical decisions — component diagrams, trade-off tables, code structure |
+-| /design       | Visual/UX decisions — mockups, interaction flows, prototypes               |
+-| /build        | Code against issue — worktree, TDD, parallel agent teams                   |
+-| /review       | Code review — correctness + standards specialists                          |
+-| /verify       | QA verification — per-criterion pass/fail with evidence                    |
+-| /grill-me     | Base Q&A engine — relentless interviewing on any topic                     |
+-| /wrap-up      | End-of-session assumptions audit — surfaces decisions and follow-ups       |
+-| /prune        | Audit rules and solution docs for staleness                                |
++Skill descriptions (loaded with the skills themselves) cover the building blocks: `/describe`, `/specify`, `/architecture`, `/design`, `/build`, `/review`, `/verify`, `/grill-me`, `/wrap-up`, `/prune`, `/compound`.
+ 
+ @plugins-reference.md
+-
+-## Maintenance
+-
+-- Before ending long sessions, run `/wrap-up` to surface assumptions
+-- Run `/prune` monthly or after major refactors to audit rules and solution docs
+-
+-## Scripts CLI
+-
+-The `scripts` command is globally available (linked from `~/Projects/scripts`). It provides cross-repo utilities for dependencies, file search, git operations, and GitHub label migration. Most commands accept `--all` to operate on all repos in `~/Projects/`.
+-
+-Run `scripts --help` or `scripts <command> --help` for details on available commands and options.
+-
+-RTK reference: `~/.claude/RTK.md` (read on demand — RTK is invoked transparently by the `rtk-rewrite.sh` PreToolUse hook).
+diff --git a/REFERENCE.md b/REFERENCE.md
+new file mode 100644
+index 0000000..672a547
+--- /dev/null
++++ b/REFERENCE.md
+@@ -0,0 +1,34 @@
++# REFERENCE.md
++
++On-demand reference. Not auto-loaded by CLAUDE.md — read only when relevant.
++
++## Maintenance
++
++- Run `/wrap-up` before ending long sessions to surface assumptions.
++- Run `/prune` monthly or after major refactors to audit rules and solution docs.
++
++## Scripts CLI
++
++The `scripts` command is globally available (linked from `~/Projects/scripts`). Cross-repo utilities for dependencies, file search, git operations, and GitHub label migration. Most commands accept `--all` to operate on all repos in `~/Projects/`.
++
++```sh
++scripts --help
++scripts <command> --help
++```
++
++## RTK (Rust Token Killer)
++
++Token-optimized CLI proxy invoked transparently by the `rtk-rewrite.sh` PreToolUse hook. Direct usage only for the meta commands:
++
++```sh
++rtk gain              # token savings analytics
++rtk gain --history    # command history with savings
++rtk discover          # analyze Claude Code history for missed opportunities
++rtk proxy <cmd>       # raw passthrough (debugging)
++```
++
++See `~/.claude/RTK.md` for more.
++
++## Notes convention
++
++For multi-cycle implementations, write progress notes to `.claude/notes/<feature>.md`. Each cycle re-reads its own notes instead of carrying state through conversation. Delete the file when the feature is shipped.
+diff --git a/settings.json b/settings.json
+index f414ee4..8b13392 100644
+--- a/settings.json
++++ b/settings.json
+@@ -8,7 +8,7 @@
+     "chrome-devtools-mcp@claude-plugins-official": false,
+     "claude-code-setup@claude-plugins-official": false,
+     "claude-hud@claude-hud": true,
+-    "claude-md-management@claude-plugins-official": true,
++    "claude-md-management@claude-plugins-official": false,
+     "code-simplifier@claude-plugins-official": false,
+     "context7@claude-plugins-official": true,
+     "github@claude-plugins-official": true,
+diff --git a/skills/architecture/SKILL.md b/skills/architecture/SKILL.md
+index aa4c957..6fc2b6f 100644
+--- a/skills/architecture/SKILL.md
++++ b/skills/architecture/SKILL.md
+@@ -40,7 +40,7 @@ A GitHub issue with problem statement and acceptance criteria (from /discovery).
+ 
+ 7. Define the dependency graph between sub-tasks — what can be parallelized
+ 
+-8. **Auto-deepen thin sections** — after step 7, the lead agent scans the architecture output for weak spots. If thin sections are found (vague language like "appropriate"/"as needed"/"standard approach", fewer than 3 concrete decisions, or missing file/component references), it dispatches focused deepening agents via a new TeamCreate call to flesh out those sections with concrete decisions, specific references, and trade-off analysis. Cap at 2 rounds. Ask the user before deepening when invoked by another skill.
++8. **Auto-deepen thin sections** — scan output for vague language ("appropriate", "as needed", "standard approach"), fewer than 3 concrete decisions, or missing file references. If found, dispatch focused deepening agents (cap 2 rounds). Ask the user first when invoked by another skill.
+ 
+ ## Output
+ 
+diff --git a/skills/build/SKILL.md b/skills/build/SKILL.md
+index 36fa76e..c1b31a0 100644
+--- a/skills/build/SKILL.md
++++ b/skills/build/SKILL.md
+@@ -27,13 +27,7 @@ A GitHub issue number (with architecture/design decisions from /define) and any
+    - Refactor — clean up while tests stay green
+    - Skip TDD for pure boilerplate/wiring
+ 
+-5. **Verify before marking done** — after completing each implementation task, pause and answer these 5 questions before committing:
+-   1. What side effects fire when this code runs? (events, webhooks, notifications, cache invalidation)
+-   2. Do tests exercise the real chain, not just mocks?
+-   3. Can failure leave orphaned state? (partial writes, dangling references, leaked resources)
+-   4. What other interfaces expose this? (API endpoints, CLI commands, UI components that call this)
+-   5. Do error handling strategies align across layers?
+-   This check is mandatory but does not require user approval to proceed. Always run it; fix any gaps it reveals before committing.
++5. **Verify before marking done** — run `superpowers:verification-before-completion` after each task. Mandatory, no user approval needed; fix any gaps before committing.
+ 
+ 6. **Simplify as you go** — after every 2-3 task completions from the task list, do a quick consolidation scan:
+    - Review files you just touched for obvious duplication, dead code, or consolidation opportunities
+diff --git a/skills/define/SKILL.md b/skills/define/SKILL.md
+index 19612f9..2068c39 100644
+--- a/skills/define/SKILL.md
++++ b/skills/define/SKILL.md
+@@ -15,13 +15,11 @@ A GitHub issue number from /discovery (or provided by the user).
+ 
+ 1. Read the issue to understand the problem statement and acceptance criteria.
+ 
+-2. **Dispatch a research team** using TeamCreate before the definition team begins:
+-   - **Codebase research agent** — systematic scan of relevant code: technology stack, module structure, related implementations, naming conventions, existing patterns. Outputs a structured context brief.
+-   - **Patterns/learnings agent** — searches `.claude/docs/solutions/` (if it exists), project documentation, past decision records, and — when local patterns are thin — external documentation via Context7 or web search for relevant prior art and lessons learned.
++2. **Dispatch a research team** (TeamCreate) before the definition team:
++   - **Codebase research agent** — scans tech stack, modules, related implementations, naming, existing patterns. Outputs a structured brief.
++   - **Patterns/learnings agent** — searches `.claude/docs/solutions/`, project docs, past decisions, and (when local patterns are thin) external sources via Context7. Skip external research when 3+ direct pattern examples exist; always run full research for security/payments/privacy.
+ 
+-   **Gate rule**: skip external/web research when codebase research finds 3+ direct pattern examples. Always run full research for security, payments, privacy topics, or when local patterns are thin (fewer than 3 examples).
+-
+-   Research results are passed to both the architecture and design specialists as initial context.
++   The brief feeds both the architecture and design specialists as seed context.
+ 
+ 3. **Spawn a definition team** using TeamCreate with specialists:
+    - **Architecture specialist** — runs /architecture to explore technical approaches, seeded with research output. Pass the research brief as input — the Architecture specialist skips its own research phase when a research brief is provided. Produces component diagrams, data flow, API design, dependency graphs.
+diff --git a/skills/discovery/SKILL.md b/skills/discovery/SKILL.md
+index 86f7858..e55d034 100644
+--- a/skills/discovery/SKILL.md
++++ b/skills/discovery/SKILL.md
+@@ -9,20 +9,11 @@ You are leading the discovery phase. Your goal is to take a vague idea and produ
+ 
+ ## Phase 0 — Scope Assessment
+ 
+-Before starting, classify the task scope:
+-
+-1. **Lightweight** — trivial fix, clear requirements, obvious solution path
+-   - Fast-track: single agent runs /describe (Lightweight) then /specify (minimal) sequentially. No team dispatch.
+-   - Create the issue directly after user approval.
+-2. **Standard** — typical feature with some unknowns
+-   - Current behavior: team with /describe and /specify specialists.
+-3. **Deep** — complex cross-cutting change, security/auth/payments, architecture change, or multi-team impact
+-   - Full team plus additional specialists for flow analysis and adversarial questioning.
+-
+-Decision tree:
+-1. Is the fix already described in a bug report with clear repro steps AND touches one area? → Lightweight
+-2. Does it cross module boundaries, touch auth/security/payments, or require architecture decisions? → Deep
+-3. Otherwise → Standard
++Classify the task before dispatching:
++
++- **Lightweight** — clear repro + single area. Single agent runs /describe (Lightweight) → minimal /specify → issue. No team.
++- **Standard** — typical feature with some unknowns. Team with /describe + /specify specialists.
++- **Deep** — cross-module, auth/security/payments, architecture-changing, or multi-team. Full team + flow analyst + adversarial questioner.
+ 
+ ## Process
+ 
 -- 
 2.43.0
 
