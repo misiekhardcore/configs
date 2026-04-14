@@ -1,0 +1,198 @@
+From 219986ef1971362752a3f2f847f06c165c5d488d Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 14 Apr 2026 06:48:24 +0000
+Subject: [PATCH] chore: optimize Claude Code config for tokens, context &
+ model routing
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+settings.json:
+- model: opus[1m] -> sonnet (cheaper default; promote to opus via /model)
+- effortLevel: high -> medium (per-skill effortLevel still overrides)
+- env: add CLAUDE_CODE_SUBAGENT_MODEL=haiku, DISABLE_TELEMETRY=1
+- permissions: drop duplicate "Edit" and phantom "Update"
+- enabledPlugins: disable chrome-devtools-mcp, claude-code-setup,
+  code-simplifier (overlaps built-in /simplify); keep claude-hud
+  enabled because the statusLine command depends on its plugin dir
+
+CLAUDE.md:
+- replace "always use agent teams" rule with a default-to-single-agent
+  rule; teams reserved for 3+ parallelizable units of work
+- drop @RTK.md auto-import (RTK is invoked transparently by the
+  rtk-rewrite hook); leave a one-line pointer instead
+
+skills:
+- discovery/define/architecture: model: opus + effortLevel: high
+  (design trio kept on the strongest reasoner — these run rarely
+  per-feature so the cost is bounded)
+- build/implement: model: sonnet (mechanical; escalate via /model)
+- review: model: sonnet + effortLevel: high (lead stays Sonnet,
+  documented /review --deep escape hatch for opus on risky PRs)
+---
+ CLAUDE.md                    |  7 ++++---
+ settings.json                | 16 ++++++++--------
+ skills/architecture/SKILL.md |  2 ++
+ skills/build/SKILL.md        |  1 +
+ skills/define/SKILL.md       |  2 ++
+ skills/discovery/SKILL.md    |  3 ++-
+ skills/implement/SKILL.md    |  1 +
+ skills/review/SKILL.md       |  2 ++
+ 8 files changed, 22 insertions(+), 12 deletions(-)
+
+diff --git a/CLAUDE.md b/CLAUDE.md
+index ac34d56..b1166bd 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -4,8 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
+ 
+ ## Implementation Rules
+ 
+-- **Always use agent teams** for non-trivial implementation. Use `TeamCreate` to spawn teammates — assign each a separate sub-issue or file group to avoid conflicts. Only fall back to single-agent for trivial single-file fixes. When dispatching subagents, explicitly instruct them to use teams.
+-- Respond concisely; no filler, no preamble
++- **Default to single-agent.** Use `TeamCreate` only for parallelizable work across 3+ independent files or sub-issues. Team overhead (per-agent system prompt, message passing, coordination) costs more than it saves on smaller tasks.
++- Respond concisely; no filler, no preamble.
++- Use the cheapest viable model. Skills set their own `model:` and `effortLevel:` — trust them.
+ 
+ ## Feature Workflow
+ 
+@@ -51,4 +52,4 @@ The `scripts` command is globally available (linked from `~/Projects/scripts`).
+ 
+ Run `scripts --help` or `scripts <command> --help` for details on available commands and options.
+ 
+-@RTK.md
++RTK reference: `~/.claude/RTK.md` (read on demand — RTK is invoked transparently by the `rtk-rewrite.sh` PreToolUse hook).
+diff --git a/settings.json b/settings.json
+index 628ff33..f414ee4 100644
+--- a/settings.json
++++ b/settings.json
+@@ -3,13 +3,13 @@
+     "commit": "",
+     "pr": ""
+   },
+-  "effortLevel": "high",
++  "effortLevel": "medium",
+   "enabledPlugins": {
+-    "chrome-devtools-mcp@claude-plugins-official": true,
+-    "claude-code-setup@claude-plugins-official": true,
++    "chrome-devtools-mcp@claude-plugins-official": false,
++    "claude-code-setup@claude-plugins-official": false,
+     "claude-hud@claude-hud": true,
+     "claude-md-management@claude-plugins-official": true,
+-    "code-simplifier@claude-plugins-official": true,
++    "code-simplifier@claude-plugins-official": false,
+     "context7@claude-plugins-official": true,
+     "github@claude-plugins-official": true,
+     "skill-creator@claude-plugins-official": true,
+@@ -17,7 +17,9 @@
+     "worktrunk@worktrunk": true
+   },
+   "env": {
+-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
++    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
++    "CLAUDE_CODE_SUBAGENT_MODEL": "haiku",
++    "DISABLE_TELEMETRY": "1"
+   },
+   "extraKnownMarketplaces": {
+     "claude-hud": {
+@@ -68,7 +70,7 @@
+       }
+     ]
+   },
+-  "model": "opus[1m]",
++  "model": "sonnet",
+   "permissions": {
+     "allow": [
+       "Agent",
+@@ -77,11 +79,9 @@
+       "Glob",
+       "Grep",
+       "Read",
+-      "Edit",
+       "Write",
+       "Skill",
+       "TeamCreate",
+-      "Update",
+       "WebSearch",
+       "WebFetch",
+       "mcp__*"
+diff --git a/skills/architecture/SKILL.md b/skills/architecture/SKILL.md
+index dab5f1c..aa4c957 100644
+--- a/skills/architecture/SKILL.md
++++ b/skills/architecture/SKILL.md
+@@ -1,6 +1,8 @@
+ ---
+ name: architecture
+ description: Explore and decide on technical architecture for a feature. Targeted grill-me wrapper for making structural decisions — components, data flow, APIs, dependencies.
++model: opus
++effortLevel: high
+ ---
+ 
+ You are leading an architecture team. Your job is to explore technical approaches with the user and converge on the right architecture for the feature.
+diff --git a/skills/build/SKILL.md b/skills/build/SKILL.md
+index a000ba2..36fa76e 100644
+--- a/skills/build/SKILL.md
++++ b/skills/build/SKILL.md
+@@ -1,6 +1,7 @@
+ ---
+ name: build
+ description: Build a feature from a GitHub issue. Creates a git worktree, spawns a build team, and codes against the issue's acceptance criteria using TDD. Use after /define has produced approved architecture decisions.
++model: sonnet
+ ---
+ 
+ You are leading the build phase. Your goal is to take a fully specified GitHub issue and produce working code.
+diff --git a/skills/define/SKILL.md b/skills/define/SKILL.md
+index d51536f..19612f9 100644
+--- a/skills/define/SKILL.md
++++ b/skills/define/SKILL.md
+@@ -1,6 +1,8 @@
+ ---
+ name: define
+ description: Full definition phase — plan architecture and design for a feature. Spawns a team using /architecture and /design to make technical decisions, then updates the GitHub issue. Use after /discovery has produced an approved issue.
++model: opus
++effortLevel: high
+ ---
+ 
+ You are leading the definition phase. Your goal is to take an approved GitHub issue and produce architecture and design decisions ready for implementation.
+diff --git a/skills/discovery/SKILL.md b/skills/discovery/SKILL.md
+index c96ca43..86f7858 100644
+--- a/skills/discovery/SKILL.md
++++ b/skills/discovery/SKILL.md
+@@ -1,7 +1,8 @@
+ ---
+ name: discovery
+ description: Full discovery phase — explore a problem and produce a GitHub issue with requirements. Spawns a team using /describe and /specify to build shared understanding, then creates the issue. Use at the start of any new feature.
+-model: sonnet
++model: opus
++effortLevel: high
+ ---
+ 
+ You are leading the discovery phase. Your goal is to take a vague idea and produce a well-specified GitHub issue ready for architecture and implementation.
+diff --git a/skills/implement/SKILL.md b/skills/implement/SKILL.md
+index f089e57..0f82914 100644
+--- a/skills/implement/SKILL.md
++++ b/skills/implement/SKILL.md
+@@ -1,6 +1,7 @@
+ ---
+ name: implement
+ description: Full implementation cycle — build, review, and verify a feature until ready, then open a PR. Orchestrates /build → /review → /verify in a loop. Use after /define has produced approved architecture decisions.
++model: sonnet
+ ---
+ 
+ You are orchestrating the full implementation cycle. Your goal is to take a fully defined GitHub issue and produce a ready-to-merge PR.
+diff --git a/skills/review/SKILL.md b/skills/review/SKILL.md
+index 97f035f..54fc355 100644
+--- a/skills/review/SKILL.md
++++ b/skills/review/SKILL.md
+@@ -1,6 +1,8 @@
+ ---
+ name: review
+ description: Review an implementation against its issue requirements. Spawns a review team — one for correctness, one for style/standards. Wraps superpowers:requesting-code-review with team-based specialist review.
++model: sonnet
++effortLevel: high
+ ---
+ 
+ You are leading the review phase. Your goal is to thoroughly review the implementation and produce actionable findings.
+-- 
+2.43.0
+
