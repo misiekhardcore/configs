@@ -10,3 +10,6 @@
 [submodule "ptyxis"]
 	path = ptyxis
 	url = git@github.com:misiekhardcore/ptyxis-config.git
+[submodule "copilot-api-service"]
+	path = copilot-api-service
+	url = git@github.com:misiekhardcore/copilot-api-config.git
